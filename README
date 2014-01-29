@@ -1,0 +1,148 @@
+INTRODUCTION
+============
+
+The SessionLog plugin was created by Miquel Esplà-Gomis
+(mespla@dlsi.ua.es) at University of Alacant (www.ua.es)
+and is licensed under GPLv3. This is a plugin for OmegaT
+(htpp://www.omegat.org) translation memory tool, and is
+aimed at capturing the actions performed by a user when
+translating a document with OmegaT. The plugin produces,
+as an output, an XML log which contains a list of actions
+performed by the user in a translation project.
+
+A DTD describing the format of the XML log can be found at
+http://www.dlsi.ua.es/~mespla/DTD/OmegaT/sessionlog-omegat-0.9.dtd
+
+To illustrate the format of the session logs, here you can
+see an example of one of them:
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log PUBLIC "-//OmegaT SessionLog//DTD XML SessionLog 0.9//EN" "http://www.dlsi.ua.es/~mespla/DTD/OmegaT/sessionlog-omegat-0.9.dtd">
+<log>
+  <project name="Project1" sl="ES" time="20140129111832907UTC" timestamp="1390994312909" tl="EN">
+    <file name="emea-document-es.odt" time="20140129111832910UTC" timestamp="1390994312910">
+      <segment duration="17.433s" number="1" time="20140129111840516UTC" timestamp="1390994320516">
+        <source>Ciprofloxacin Nycomed y nombres asociados</source>
+        <initialTarget>Ciprofloxacin Nycomed y nombres asociados</initialTarget>
+        <TMRecommendations number="4"/>
+        <MTRecommendations number="1"/>
+        <glossaryRecommendations number="2"/>
+        <events>
+          <NewTMRecommendationSelected current="3" former="1" time="20140129111842948UTC" timestamp="1390994322948"/>
+          <delete from="TM" id="ID3" length="41" offset="0" proposal_number="3" time="20140129111843522UTC" timestamp="1390994323523">Ciprofloxacin Nycomed y nombres asociados</delete>
+          <insert fms="54" fms_onlywords="40" fms_stemming_onlywords="50" from="TM" id="ID4" length="31" offset="0" proposal_number="3" time="20140129111843523UTC" timestamp="1390994323523"> Octegra and associated names</insert>
+          <textSelection end_offset="9" init_offset="0" time="20140129111846927UTC" timestamp="1390994326927"> Octegra </textSelection>
+          <delete id="ID5" length="8" offset="0" time="20140129111848634UTC" timestamp="1390994328634"> Octegra </delete>
+          <insert id="ID6" length="1" offset="0" time="20140129111848634UTC" timestamp="1390994328635">C</insert>
+          <insert id="ID7" length="1" offset="1" time="20140129111848900UTC" timestamp="1390994328900">i</insert>
+          <insert id="ID8" length="1" offset="2" time="20140129111849272UTC" timestamp="1390994329273">p</insert>
+          <insert id="ID9" length="1" offset="3" time="20140129111849496UTC" timestamp="1390994329496">r</insert>
+          <insert id="ID10" length="1" offset="4" time="20140129111849570UTC" timestamp="1390994329570">o</insert>
+          <insert id="ID11" length="1" offset="5" time="20140129111849978UTC" timestamp="1390994329978">f</insert>
+          <insert id="ID12" length="1" offset="6" time="20140129111850930UTC" timestamp="1390994330930">l</insert>
+          <insert id="ID13" length="1" offset="7" time="20140129111851151UTC" timestamp="1390994331151">o</insert>
+          <insert id="ID14" length="1" offset="8" time="20140129111851499UTC" timestamp="1390994331500">x</insert>
+          <insert id="ID15" length="1" offset="9" time="20140129111851583UTC" timestamp="1390994331583">a</insert>
+          <insert id="ID16" length="1" offset="10" time="20140129111851805UTC" timestamp="1390994331805">c</insert>
+          <insert id="ID17" length="1" offset="11" time="20140129111851888UTC" timestamp="1390994331888">i</insert>
+          <insert id="ID18" length="1" offset="12" time="2014012911185244UTC" timestamp="1390994332044">n</insert>
+        </events>
+        <finalTarget>Ciprofloxacin Nycomed and associated names</finalTarget>
+      </segment>
+    </file>
+  </project>
+</log>
+
+In the example presented, we can see that the translator
+opened a proejct called "Project1" for translating a
+document in Spanish (ES) into English (EN). In most of the
+elements we can see the attributes "time" and "timestamp".
+The first one allows to know the date and time (in
+milliseconds) at which the action was performed, in format
+YYYYMMDDhhmmssSSS (Y=year, M=month, D=day, h=hour,
+m=minutes, s=seconds, S=milliseconds). The "timestamp" is
+the number of milliseconds since January 1, 1970, 00:00:00
+GMT, and allows to easily compute the time elapse between
+two events.
+
+Following the example, the file "emea-document-es.odt" is
+opened and the first segment is chosen. In the <segment>
+element we can see attributes informing about the position
+of the segment in the document (number) and time spent by
+the user to translate the segment (duration) which is
+measured in seconds.
+
+Fields <source> and <initialTarget> indicate the source
+segment to be translated and the segment presented to the
+user, initially, as the translation. Following these
+elements, we can find elements TMRecommendations,
+MTRecommendations, and glossaryRecommendations, which
+inform about the number of recommendations proposed to the
+translator in the text areas corresponding to the
+translation memory, the machine translation engines, and
+the glossary, respectivelly.
+
+In the <events> block we can see all the actions performed
+by the user. First, we can find the element
+<NewTMRecommendationSelected>, informing that the user
+chose the matching suggestion 3 in the translation memory
+text area. The next actions are a deletion (<delete>) and
+an insertion (<insert>), which correspond to the action of
+replacing a segment by the active match (replacements
+appear as a monolithic edition for a translator, but,
+internally, for OmegaT they are two editions). Both
+editions editions contain an attribute "from" indicating
+that both the deletion and the insertion come from the
+translation memory (TM). Other attributes inform us about
+the position in the segment from which each edition started
+("offset"), the length of the edition ("length"), the
+proposal by which the segment was replaced
+("proposal_number") and, in the case of the insertion, the
+value of the different FMS for the match proposal. Similar
+editions would be produced by the replacement of a segment
+by machine translation proposal or a glossary proposal.
+
+Finally, we can see that the user selects ("textSelection")
+the name of a medicine, deletes it, and replaces it by a
+new medicine name. All the editions are identified by an ID
+which would allow to keep track of the undo/redo actions.
+For example, if the translator had undone the last insertion,
+the <events> block would end with an element
+
+<undo id="ID19" on_event="ID18" ... >
+
+The plugin also provides an option in the menu "Options" of
+OmegaT for indicating a pause in the translation, which is
+represented in the log as:
+
+<pause duration="Xs" ... >
+
+where X is the number of seconds of the pause. This
+information can be then used to compute the real time the
+user spent in a translation.
+
+
+
+
+INSTALLATION
+============
+
+Releases of the SessionLog plugin for OmegaT are available
+at the website of the project (https://github.com/mespla/OmegaT-SessionLog/).
+To enable the plugin, simply extract the content of the
+compressed folder of any release in a "plugins" folder
+located in OmegaT's installation folder. If this folder
+does not exist, just create it.
+
+If you prefer to compile the plugin from the source code,
+you can use the tool "ant" for creating a jar file from
+the sources. Just type "ant jar" in the folder where the
+build.xml file is, and the jar file will be created in a
+sub-folder build. Then copy the jar file to the "plugins"
+folder as indicated.
+
+
+
+
+
+
