@@ -59,9 +59,11 @@ public class ProjectChangesListener implements IProjectEventListener {
     public void onProjectChanged(PROJECT_CHANGE_TYPE eventType) {
         try {
             if(eventType==PROJECT_CHANGE_TYPE.CLOSE){
+                sessionlog.GetMenu().pausetiming.setEnabled(false);
                 sessionlog.GetLog().CloseProject();
             }
             else if(eventType==PROJECT_CHANGE_TYPE.LOAD || eventType==PROJECT_CHANGE_TYPE.CREATE){
+                sessionlog.GetMenu().pausetiming.setEnabled(true);
                 sessionlog.GetLog().NewProject();
                 sessionlog.GetLog().NewFile(Core.getEditor().getCurrentFile());
             }

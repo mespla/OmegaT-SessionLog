@@ -91,6 +91,7 @@ public class SessionLogMenu {
         this.pausetiming = new JCheckBoxMenuItem("SessionLog: pause timing");
         this.pausetiming.addActionListener(pausetimingMenuItemActionListener);
         this.pausetiming.setSelected(false);
+        this.pausetiming.setEnabled(false);
         
         
         this.dump_log = new JMenuItem("Save the session log");
