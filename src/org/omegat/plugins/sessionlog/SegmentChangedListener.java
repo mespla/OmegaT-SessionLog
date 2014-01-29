@@ -48,19 +48,19 @@ public class SegmentChangedListener implements IEntryEventListener{
     /** Document filter that controls the editions on the segments before they are performed. */
     private EditorTextAreaDocumentFilter filter;
     
-    /** Productivity tracking plugin class. */
-    private SessionLogPlugin productivity;
+    /** SessionLog plugin class. */
+    private SessionLogPlugin sessionlog;
     
     /** Document listener that controls the editions on the segments after they are performed. */
     private EditorTextAreaDocumentListener text_area_listener;
 
     /**
      * Overloaded constructor.
-     * @param productivity Productivity tracking plugin class
+     * @param sessionlog SessionLog plugin class
      */
-    public SegmentChangedListener(SessionLogPlugin productivity) {
+    public SegmentChangedListener(SessionLogPlugin sessionlog) {
         this.filter=null;
-        this.productivity=productivity;
+        this.sessionlog=sessionlog;
         this.caret_listener=null;
     }
 
@@ -70,7 +70,7 @@ public class SegmentChangedListener implements IEntryEventListener{
      */
     @Override
     public void onNewFile(String activeFileName) {
-        productivity.GetLog().NewFile(activeFileName);
+        sessionlog.GetLog().NewFile(activeFileName);
     }
 
     /**
@@ -80,22 +80,22 @@ public class SegmentChangedListener implements IEntryEventListener{
     @Override
     public void onEntryActivated(SourceTextEntry newEntry) {
         if(filter==null){
-            filter=new EditorTextAreaDocumentFilter(productivity);
+            filter=new EditorTextAreaDocumentFilter(sessionlog);
             IntrospectionTools.getEditorTextArea().getOmDocument(
                     ).setDocumentFilter(filter);
         }
         
         if(caret_listener==null){
-            caret_listener=new CaretUpdateListener(productivity);
+            caret_listener=new CaretUpdateListener(sessionlog);
             IntrospectionTools.getEditorTextArea().addCaretListener(
                     caret_listener);
         }
         if(text_area_listener==null){
-            text_area_listener=new EditorTextAreaDocumentListener(productivity);
+            text_area_listener=new EditorTextAreaDocumentListener(sessionlog);
             IntrospectionTools.getEditorTextArea().getOmDocument(
                     ).addDocumentListener(text_area_listener);
         }
-        productivity.GetLog().CloseEntry();
-        productivity.GetLog().NewEntry(newEntry);
+        sessionlog.GetLog().CloseEntry();
+        sessionlog.GetLog().NewEntry(newEntry);
     }
 }

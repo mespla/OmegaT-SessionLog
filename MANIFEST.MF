@@ -3,6 +3,6 @@ Ant-Version: Apache Ant 1.8.2
 Created-By: 1.7.0_25-b30 (Oracle Corporation)
 OmegaT-Plugin: true
 
-Name: org.omegat.plugins.productivity.ProductivityPlugin
+Name: org.omegat.plugins.sessionlog.SessionLogPlugin
 OmegaT-Plugin: Base
 

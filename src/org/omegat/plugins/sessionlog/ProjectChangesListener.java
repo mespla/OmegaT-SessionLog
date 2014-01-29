@@ -39,15 +39,15 @@ import org.omegat.core.events.IProjectEventListener;
  */
 public class ProjectChangesListener implements IProjectEventListener {
     
-    /** Productivity plugin object */
-    private SessionLogPlugin productivity;
+    /** SessionLog plugin object */
+    private SessionLogPlugin sessionlog;
 
     /**
      * Constructor of the class.
-     * @param productivity Productivity plugin object
+     * @param sessionlog SessionLog plugin object
      */
-    public ProjectChangesListener(SessionLogPlugin productivity) {
-        this.productivity = productivity;
+    public ProjectChangesListener(SessionLogPlugin sessionlog) {
+        this.sessionlog = sessionlog;
     }
 
     /**
@@ -59,11 +59,11 @@ public class ProjectChangesListener implements IProjectEventListener {
     public void onProjectChanged(PROJECT_CHANGE_TYPE eventType) {
         try {
             if(eventType==PROJECT_CHANGE_TYPE.CLOSE){
-                productivity.GetLog().CloseProject();
+                sessionlog.GetLog().CloseProject();
             }
             else if(eventType==PROJECT_CHANGE_TYPE.LOAD || eventType==PROJECT_CHANGE_TYPE.CREATE){
-                productivity.GetLog().NewProject();
-                productivity.GetLog().NewFile(Core.getEditor().getCurrentFile());
+                sessionlog.GetLog().NewProject();
+                sessionlog.GetLog().NewFile(Core.getEditor().getCurrentFile());
             }
         }catch (FileNotFoundException ex) {
             ex.printStackTrace(System.err);

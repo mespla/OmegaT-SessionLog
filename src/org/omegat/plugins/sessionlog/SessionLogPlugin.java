@@ -44,9 +44,9 @@ import org.omegat.plugins.sessionlog.loggers.XMLLogger;
 import org.omegat.util.StaticUtils;
 
 /**
- * Productivity tracking plugin main class. This class centralises the
- * productivity tracking. Here, the XML tree is created containing all the
- * information collected, and the edition timing of each entry is measured.
+ * SessionLog plugin main class. This class centralises the session logging.
+ * Here, the logger is created containing all the information collected, and
+ * the edition timing of each entry is measured.
  * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
  */
 public class SessionLogPlugin {
@@ -59,7 +59,7 @@ public class SessionLogPlugin {
     
     /**
      * Constructor of the plugin. This constructor registers the
-     * <code>ApplicationEventListenerProductivity</code>
+     * <code>ApplicationEventListenerSessionLog</code>
      * listener (which registers most of the other listeners) and the handler
      * created to capture all the messages from the logger.
      */
@@ -80,8 +80,8 @@ public class SessionLogPlugin {
     }
     
     /**
-     * Returns the current productivity tracking logger .
-     * @return XML productivity tracking logger
+     * Returns the current logger .
+     * @return XML logger
      */
     public BaseLogger GetLog(){
         return xmllog;
@@ -99,11 +99,11 @@ public class SessionLogPlugin {
      */
     public void PrintLog(boolean ask) {
         GetLog().CloseEntry();
-        //If the user decides to store the productivity tracking log...
+        //If the user decides to store the session logger
         boolean save=true;
         if(ask){
             int answer=JOptionPane.showConfirmDialog(null, "Do you want to store the"
-                + " productivity log into a file?", "Productivity log",
+                + " session log into a file?", "Session log",
                 JOptionPane.YES_NO_OPTION);
             if(answer != JOptionPane.YES_OPTION)
                 save=false;
@@ -132,14 +132,14 @@ public class SessionLogPlugin {
     
     /**
      * This class implements a handler for the logger in order to capture the
-     * log messages into the productivity tracking log.
+     * log messages into the session log.
      */
     private class LoggerHandler extends Handler{
         /**
          * This method captures the log messages from the logger in order to
-         * include them into the productivity tracking log. This method takes
+         * include them into the session log. This method takes
          * a logger record and processes it to be included in the current
-         * productivity tracking log.
+         * session log.
          * @param record Record from the logger to be processed
          */
         @Override

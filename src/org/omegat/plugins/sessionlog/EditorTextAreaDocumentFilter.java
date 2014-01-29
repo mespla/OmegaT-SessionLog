@@ -41,10 +41,10 @@ import org.omegat.gui.editor.Document3;
  */
 public class EditorTextAreaDocumentFilter extends DocumentFilter{
     
-    SessionLogPlugin productivity;
+    SessionLogPlugin sessionlog;
     
-    public EditorTextAreaDocumentFilter(SessionLogPlugin productivity){
-        this.productivity=productivity;
+    public EditorTextAreaDocumentFilter(SessionLogPlugin sessionlog){
+        this.sessionlog=sessionlog;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter{
         try{
             String text_to_remove=fb.getDocument().getText(offset, length);
             int trans_start=doc.getTranslationStart();
-            productivity.GetLog().NewDeletion(offset-trans_start, text_to_remove, doc);
+            sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove, doc);
         }catch(NullPointerException ex){}
     }
 
@@ -66,7 +66,7 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter{
         Document3 doc=(Document3)fb.getDocument();
         try{
             int trans_start=doc.getTranslationStart();
-            productivity.GetLog().NewInsertion(offset-trans_start, string, doc);
+            sessionlog.GetLog().NewInsertion(offset-trans_start, string, doc);
         }catch(NullPointerException ex){}
     }
     
@@ -85,12 +85,12 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter{
             Scores scores=Core.getMatcher().getActiveMatch().scores[0];
             
             if(offset==trans_start && length==trans_end-trans_start){
-                productivity.GetLog().ReplaceFromTM(offset-trans_start,
+                sessionlog.GetLog().ReplaceFromTM(offset-trans_start,
                         IntrospectionTools.getActiveMatchIndex(), text_to_remove, text, scores.score,
                         scores.scoreNoStem, scores.adjustedScore, doc);
             }
             else{
-                productivity.GetLog().InsertFromTM(offset-trans_start,
+                sessionlog.GetLog().InsertFromTM(offset-trans_start,
                         IntrospectionTools.getActiveMatchIndex(), text, scores.score,
                         scores.scoreNoStem, scores.adjustedScore, doc);
             }
@@ -98,13 +98,13 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter{
         else if(Core.getMachineTranslatePane().getDisplayedTranslation()!=null &&
                 Core.getMachineTranslatePane().getDisplayedTranslation().equals(
                 text)){
-            productivity.GetLog().ReplaceFromMT(offset-trans_start,
+            sessionlog.GetLog().ReplaceFromMT(offset-trans_start,
                     text_to_remove, text, doc);
         }
         else{
             if(length>0)
-                productivity.GetLog().NewDeletion(offset-trans_start, text_to_remove, doc);
-            productivity.GetLog().NewInsertion(offset-trans_start, text, doc);
+                sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove, doc);
+            sessionlog.GetLog().NewInsertion(offset-trans_start, text, doc);
         }
         
         super.replace(fb, offset, length, text, attrs);

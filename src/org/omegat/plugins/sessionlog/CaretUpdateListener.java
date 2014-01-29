@@ -38,21 +38,21 @@ import org.omegat.gui.editor.EditorTextArea3;
 /**
  * Event listener that manages the changes in the edition text area. This class
  * implements a <code>DocumentListener</code> to control the edition text area.
- * All the insertions and deletions are registered to be stored in the
- * productivity tracking log.
+ * All the insertions and deletions are registered to be stored in the session
+ * log.
  * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
  */
 public class CaretUpdateListener implements CaretListener{
 
-    /** Productivity plugin object */
-    private SessionLogPlugin productivity;
+    /** Session log plugin object */
+    private SessionLogPlugin sessionlog;
     
     /**
      * Constructor of the class.
-     * @param productivity Productivity plugin object
+     * @param sessionlog SessionLog plugin object
      */
-    public CaretUpdateListener(SessionLogPlugin productivity) {
-        this.productivity = productivity;
+    public CaretUpdateListener(SessionLogPlugin sessionlog) {
+        this.sessionlog = sessionlog;
     }
 
     /**
@@ -68,7 +68,7 @@ public class CaretUpdateListener implements CaretListener{
                 int start_trans=doc.getTranslationStart();
                 int end_trans=start_trans+Core.getEditor().getCurrentTranslation().length();
                 if(e.getDot()>=start_trans && e.getDot()<=end_trans){
-                    productivity.GetLog().CaretUpdate(e.getMark()+1, e.getDot()+1);
+                    sessionlog.GetLog().CaretUpdate(e.getMark()+1, e.getDot()+1);
                 }
             }
         }

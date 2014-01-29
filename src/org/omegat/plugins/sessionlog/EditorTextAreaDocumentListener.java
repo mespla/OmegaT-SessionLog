@@ -40,22 +40,22 @@ import org.omegat.core.Core;
  */
 public class EditorTextAreaDocumentListener implements DocumentListener{
     
-    SessionLogPlugin productivity;
+    SessionLogPlugin sessionlog;
     
-    public EditorTextAreaDocumentListener(SessionLogPlugin productivity){
-        this.productivity=productivity;
+    public EditorTextAreaDocumentListener(SessionLogPlugin sessionlog){
+        this.sessionlog=sessionlog;
     }
 
     @Override
     public void insertUpdate(DocumentEvent e) {
         if(Core.getEditor().getCurrentTranslation()!=null)
-            productivity.GetLog().SetLastEditedText(Core.getEditor().getCurrentTranslation());
+            sessionlog.GetLog().SetLastEditedText(Core.getEditor().getCurrentTranslation());
     }
 
     @Override
     public void removeUpdate(DocumentEvent e) {
         if(Core.getEditor().getCurrentTranslation()!=null)
-            productivity.GetLog().SetLastEditedText(Core.getEditor().getCurrentTranslation());
+            sessionlog.GetLog().SetLastEditedText(Core.getEditor().getCurrentTranslation());
     }
 
     @Override

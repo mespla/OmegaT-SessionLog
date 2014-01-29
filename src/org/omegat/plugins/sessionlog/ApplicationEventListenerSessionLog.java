@@ -49,9 +49,11 @@ import org.omegat.gui.matches.MatchesTextArea;
 
 /**
  * Class that extends an <code>IApplicationEventListener</code> object, and
- * performs the actions needed for starting the collection of productivity data.
+ * performs the actions needed for starting the collection of listeners used to
+ * capture the session events.
  * This class overwrites the methods <code>onApplicationStartup</code>, which
- * registers some listeners needed for capturing productivity data, and <code>
+ * registers some listeners needed for capturing the session events at the start
+ * of the application, and <code>
  * onApplicationShutdown</code> which creates the XML file containing all the
  * information obtained during the translation.
  * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
@@ -59,14 +61,14 @@ import org.omegat.gui.matches.MatchesTextArea;
 public class ApplicationEventListenerSessionLog implements IApplicationEventListener{
     
     /** Plugin class from which this class is created */
-    SessionLogPlugin productivity;
+    SessionLogPlugin sessionlog;
 
     /**
      * Overloaded constructor of the class.
-     * @param productivity Plugin class from which this class is created
+     * @param sessionlog Plugin class from which this class is created
      */
-    public ApplicationEventListenerSessionLog(SessionLogPlugin productivity) {
-        this.productivity = productivity;
+    public ApplicationEventListenerSessionLog(SessionLogPlugin sessionlog) {
+        this.sessionlog = sessionlog;
     }
 
     /**
@@ -74,8 +76,8 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
      */
     @Override
     public void onApplicationStartup() {
-        CoreEvents.registerProjectChangeListener(new ProjectChangesListener(productivity));
-        CoreEvents.registerEntryEventListener(new SegmentChangedListener(productivity));
+        CoreEvents.registerProjectChangeListener(new ProjectChangesListener(sessionlog));
+        CoreEvents.registerEntryEventListener(new SegmentChangedListener(sessionlog));
         SwingUtilities.invokeLater(new Runnable()
         {
             @Override
@@ -102,13 +104,13 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                         editUndoMenuItem.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                productivity.GetLog().Undo();
+                                sessionlog.GetLog().Undo();
                             }
                         });
                         editRedoMenuItem.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                productivity.GetLog().Redo();
+                                sessionlog.GetLog().Redo();
                             }
                         });
                     }
@@ -131,8 +133,8 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                     @Override
                     public void changedUpdate(DocumentEvent e) {
                         int activeMatch=IntrospectionTools.getActiveMatchIndex();
-                        if(productivity.GetLog().getCurrentTMProposals()!=activeMatch+1){
-                            productivity.GetLog().setCurrentTMProposals(activeMatch+1);
+                        if(sessionlog.GetLog().getCurrentTMProposals()!=activeMatch+1){
+                            sessionlog.GetLog().setCurrentTMProposals(activeMatch+1);
                         }
                     }
 
@@ -140,7 +142,7 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                     public void insertUpdate(DocumentEvent e) {
                         try {
                             if(!e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                    productivity.GetLog().setEmtpyTMProposals(false);
+                                    sessionlog.GetLog().setEmtpyTMProposals(false);
                         } catch (BadLocationException ex) {}
                     }
 
@@ -148,7 +150,7 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                     public void removeUpdate(DocumentEvent e) {
                         try {
                             if(e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                productivity.GetLog().setEmtpyTMProposals(true);
+                                sessionlog.GetLog().setEmtpyTMProposals(true);
                         } catch (BadLocationException ex) {}
                     }
                 });
@@ -159,8 +161,8 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                     @Override
                     public void changedUpdate(DocumentEvent e) {
                         int activeMatch=IntrospectionTools.getActiveMatchIndex();
-                        if(productivity.GetLog().getCurrentTMProposals()!=activeMatch+1){
-                            productivity.GetLog().setCurrentTMProposals(activeMatch+1);
+                        if(sessionlog.GetLog().getCurrentTMProposals()!=activeMatch+1){
+                            sessionlog.GetLog().setCurrentTMProposals(activeMatch+1);
                         }
                     }
 
@@ -168,7 +170,7 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                     public void insertUpdate(DocumentEvent e) {
                         try {
                             if(!e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                    productivity.GetLog().setEmtpyTMProposals(false);
+                                    sessionlog.GetLog().setEmtpyTMProposals(false);
                         } catch (BadLocationException ex) {}
                     }
 
@@ -176,7 +178,7 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                     public void removeUpdate(DocumentEvent e) {
                         try {
                             if(e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                productivity.GetLog().setEmtpyTMProposals(true);
+                                sessionlog.GetLog().setEmtpyTMProposals(true);
                         } catch (BadLocationException ex) {}
                     }
                 });
@@ -192,7 +194,7 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                     public void insertUpdate(DocumentEvent e) {
                         try {
                             if(!e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                    productivity.GetLog().setEmtpyGlossaryProposals(false);
+                                    sessionlog.GetLog().setEmtpyGlossaryProposals(false);
                         } catch (BadLocationException ex) {}
                     }
 
@@ -200,7 +202,7 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                     public void removeUpdate(DocumentEvent e) {
                         try {
                             if(e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                productivity.GetLog().setEmtpyGlossaryProposals(true);
+                                sessionlog.GetLog().setEmtpyGlossaryProposals(true);
                         } catch (BadLocationException ex) {}
                     }
                 });
@@ -216,7 +218,7 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                     public void insertUpdate(DocumentEvent e) {
                         try {
                             if(!e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                    productivity.GetLog().setEmtpyMTProposals(false);
+                                    sessionlog.GetLog().setEmtpyMTProposals(false);
                         } catch (BadLocationException ex) {}
                     }
 
@@ -224,7 +226,7 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                     public void removeUpdate(DocumentEvent e) {
                         try {
                             if(e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                productivity.GetLog().setEmtpyMTProposals(true);
+                                sessionlog.GetLog().setEmtpyMTProposals(true);
                         } catch (BadLocationException ex) {}
                     }
                 });
@@ -234,7 +236,7 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
 
     @Override
     public void onApplicationShutdown() {
-        productivity.PrintLog(true);
+        sessionlog.PrintLog(true);
     }
     
     class PopupListener extends MouseAdapter {
@@ -261,7 +263,7 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                 String selTxt = glossaryTextArea.getSelectedText();
                 if (selTxt != null) {
                     EditorTextArea3 text=IntrospectionTools.getEditorTextArea();
-                    productivity.GetLog().InsertFromGlossary(text.getCaret().getDot(),
+                    sessionlog.GetLog().InsertFromGlossary(text.getCaret().getDot(),
                             selTxt, text.getOmDocument());  
                 }
             }

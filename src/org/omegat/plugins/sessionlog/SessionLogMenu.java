@@ -46,7 +46,7 @@ import org.omegat.gui.matches.MatchesTextArea;
  */
 public class SessionLogMenu {
     
-    private SessionLogPlugin productivity;
+    private SessionLogPlugin sessionlog;
 
     /** Option for pausing the timing. */
     final JCheckBoxMenuItem pausetiming;
@@ -82,18 +82,18 @@ public class SessionLogMenu {
     
     /**
      * Constructor of the class, which adds the option to the menu.
-     * @param productivity Object that controls the coloring in the matcher.
+     * @param sessionlog Object that controls the coloring in the matcher.
      */
-    public SessionLogMenu(SessionLogPlugin productivity) {
-        this.productivity=productivity;
+    public SessionLogMenu(SessionLogPlugin sessionlog) {
+        this.sessionlog=sessionlog;
         this.pause_timestamp=0;
         
-        this.pausetiming = new JCheckBoxMenuItem("Productivity tracking: pause timing");
+        this.pausetiming = new JCheckBoxMenuItem("SessionLog: pause timing");
         this.pausetiming.addActionListener(pausetimingMenuItemActionListener);
         this.pausetiming.setSelected(false);
         
         
-        this.dump_log = new JMenuItem("Save the productivity log");
+        this.dump_log = new JMenuItem("Save the session log");
         this.dump_log.addActionListener(dumplogMenuItemActionListener);
         this.dump_log.setName("dump_log");
         
@@ -129,7 +129,7 @@ public class SessionLogMenu {
      * and text areas visible again.
      */
     public void resumeTimingSelected(){
-        productivity.GetLog().SetPause(System.nanoTime()-pause_timestamp);
+        sessionlog.GetLog().SetPause(System.nanoTime()-pause_timestamp);
         IntrospectionTools.getEditorTextArea().setVisible(true);
         ((MatchesTextArea)Core.getMatcher()).setVisible(true);
         Core.getGlossary().setVisible(true);
@@ -152,12 +152,12 @@ public class SessionLogMenu {
     
     /**
      * Action listener that captures the action performed when the menu option
-     * for dumping the productivity tracking log to a file is activated.
+     * for dumping the session log to a file is activated.
      */
     protected ActionListener dumplogMenuItemActionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            productivity.PrintLog(false);
+            sessionlog.PrintLog(false);
         }
     };
 }

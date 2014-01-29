@@ -81,7 +81,7 @@ public class XMLLogger implements BaseLogger{
     
     private String last_edited_text;
     
-    private SessionLogPlugin productivity;
+    private SessionLogPlugin sessionlog;
     
     private boolean emtpy_glossary_proposals;
     
@@ -93,12 +93,12 @@ public class XMLLogger implements BaseLogger{
     
     static private DecimalFormat df = new DecimalFormat("#.###s", new DecimalFormatSymbols(Locale.ENGLISH));
     
-    public XMLLogger(SessionLogPlugin productivity){
+    public XMLLogger(SessionLogPlugin sessionlog){
         emtpy_mt_proposals=true;
         emtpy_glossary_proposals=true;
         current_tm_proposal=1;
         emtpy_tm_proposals=true;
-        this.productivity=productivity;
+        this.sessionlog=sessionlog;
         caretupdates_to_ignore=0;
         edition_idx=0;
         chosen_entry_time = -1;
@@ -317,8 +317,8 @@ public class XMLLogger implements BaseLogger{
         if(active_entry!=null){
             last_edited_text=Core.getEditor().getCurrentTranslation();
             caretupdates_to_ignore=1;
-            productivity.GetMenu().setPauseTimestamp(0);
-            productivity.GetMenu().getPausetiming().setSelected(false);
+            sessionlog.GetMenu().setPauseTimestamp(0);
+            sessionlog.GetMenu().getPausetiming().setSelected(false);
             Element element = NewElement("segment", true);
             element.setAttribute("number", Integer.toString(
                     Core.getEditor().getCurrentEntry().entryNum()));
@@ -346,7 +346,7 @@ public class XMLLogger implements BaseLogger{
             transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,
                     "-//OmegaT SessionLog//DTD XML SessionLog 0.9//EN");
             transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
-                    "http://www.dlsi.ua.es/~mespla/OmegaT/productivity-traking-omegat-0.9.dtd");
+                    "http://www.dlsi.ua.es/~mespla/DTD/OmegaT/sessionlog-omegat-0.9.dtd");
             DOMSource source = new DOMSource(log_document);
             StreamResult result = new StreamResult(pw); 
             transformer.transform(source, result);
