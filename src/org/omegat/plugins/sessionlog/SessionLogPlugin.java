@@ -29,18 +29,19 @@
 package org.omegat.plugins.sessionlog;
 
 import org.omegat.plugins.sessionlog.loggers.BaseLogger;
+import org.omegat.plugins.sessionlog.loggers.XMLLogger;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
+import org.omegat.core.Core;
 import org.omegat.core.CoreEvents;
-import org.omegat.plugins.sessionlog.loggers.XMLLogger;
 import org.omegat.util.StaticUtils;
 
 /**
@@ -57,6 +58,8 @@ public class SessionLogPlugin {
     /** Logger of the plugin. */
     private BaseLogger xmllog;
     
+    private String log_path;
+    
     /**
      * Constructor of the plugin. This constructor registers the
      * <code>ApplicationEventListenerSessionLog</code>
@@ -64,6 +67,7 @@ public class SessionLogPlugin {
      * created to capture all the messages from the logger.
      */
     public SessionLogPlugin() {
+        log_path=null;
         menu=new SessionLogMenu(this);
         xmllog=new XMLLogger(this);
         CoreEvents.registerApplicationEventListener(
@@ -87,6 +91,42 @@ public class SessionLogPlugin {
         return xmllog;
     }
     
+    public void InitLogging(){
+        xmllog.Reset();
+        
+        //Flushing the data about the last entry edited
+        File dir=new File(Core.getProject().getProjectProperties(
+                ).getProjectRoot()+"/session_logs");
+        dir.mkdir();
+        
+        Date d=new Date();
+        SimpleDateFormat dt = new SimpleDateFormat("yyyyMMddHHmmssSS");
+        StringBuilder sb=new StringBuilder(dir.getAbsolutePath());
+        sb.append("/");
+        sb.append(dt.format(d));
+        sb.append("session.log");
+        File f=new File(sb.toString());
+        log_path=f.getAbsolutePath();
+        try{
+            xmllog.NewProject();
+            xmllog.NewFile(Core.getEditor().getCurrentFile());
+        } catch(FileNotFoundException ex){
+            ex.printStackTrace(System.err);
+        }
+    }
+    
+    public void StopLogging(){
+        if(log_path!=null){
+            try{
+                PrintWriter pw=new PrintWriter(log_path);
+                xmllog.DumpToWriter(pw);
+                log_path=null;
+            } catch (FileNotFoundException ex) {
+                ex.printStackTrace(System.err);
+            }
+        }
+    }
+    
     /**
      * Method that shows a dialog for choosing a path to a file where the log
      * will be writen. This method allows the user to use an output file through
@@ -97,38 +137,34 @@ public class SessionLogPlugin {
      * the method ends without presenting the dialog to the user). Otherwise,
      * the dialog is directly prompted to the used.
      */
-    public void PrintLog(boolean ask) {
-        GetLog().CloseEntry();
-        //If the user decides to store the session logger
-        boolean save=true;
-        if(ask){
-            int answer=JOptionPane.showConfirmDialog(null, "Do you want to store the"
-                + " session log into a file?", "Session log",
-                JOptionPane.YES_NO_OPTION);
-            if(answer != JOptionPane.YES_OPTION)
-                save=false;
-        }
-        if(save){
-            //The output file is choosen
-            File f;
-            do{
-                JFileChooser saveFile = new JFileChooser();
-                saveFile.showSaveDialog(null);
-                f = saveFile.getSelectedFile();
-            } while (f!=null && f.exists() && (JOptionPane.showConfirmDialog(null,
-                    "The choosen file already exists. Do you want to overwrite it?",
-                    "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION));
-            if(f!=null){
-                try{
-                    //Flushing the data about the last entry edited
-                    PrintWriter pw=new PrintWriter(f.getAbsolutePath());
-                    GetLog().DumpToWriter(pw);
-                } catch (FileNotFoundException ex) {
-                    ex.printStackTrace(System.err);
-                }
+     /*public void PrintLog() {
+        if(xmllog!=null){
+            GetLog().CloseEntry();
+            //If the user decides to store the session logger
+           boolean save=true;
+            if(ask){
+                int answer=JOptionPane.showConfirmDialog(null, "Do you want to store the"
+                    + " session log into a file?", "Session log",
+                    JOptionPane.YES_NO_OPTION);
+                if(answer != JOptionPane.YES_OPTION)
+                    save=false;
+            }
+            if(save){
+                //The output file is choosen
+                File f;
+                do{
+                    JFileChooser saveFile = new JFileChooser();
+                    saveFile.showSaveDialog(null);
+                    f = saveFile.getSelectedFile();
+                } while (f!=null && f.exists() && (JOptionPane.showConfirmDialog(null,
+                        "The choosen file already exists. Do you want to overwrite it?",
+                        "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION));
+                if(f!=null){*/
+            
+                /*}
             }
         }
-    }
+    }*/
     
     /**
      * This class implements a handler for the logger in order to capture the

@@ -28,6 +28,7 @@
 
 package org.omegat.plugins.sessionlog;
 
+import org.omegat.core.Core;
 import org.omegat.core.data.SourceTextEntry;
 import org.omegat.core.events.IEntryEventListener;
 
@@ -79,23 +80,25 @@ public class SegmentChangedListener implements IEntryEventListener{
      */
     @Override
     public void onEntryActivated(SourceTextEntry newEntry) {
-        if(filter==null){
-            filter=new EditorTextAreaDocumentFilter(sessionlog);
-            IntrospectionTools.getEditorTextArea().getOmDocument(
-                    ).setDocumentFilter(filter);
+        if(sessionlog.GetLog().GetCurrentSegmentNumber()!=Core.getEditor().getCurrentEntry().entryNum()){
+            if(filter==null){
+                filter=new EditorTextAreaDocumentFilter(sessionlog);
+                IntrospectionTools.getEditorTextArea().getOmDocument(
+                        ).setDocumentFilter(filter);
+            }
+
+            if(caret_listener==null){
+                caret_listener=new CaretUpdateListener(sessionlog);
+                IntrospectionTools.getEditorTextArea().addCaretListener(
+                        caret_listener);
+            }
+            if(text_area_listener==null){
+                text_area_listener=new EditorTextAreaDocumentListener(sessionlog);
+                IntrospectionTools.getEditorTextArea().getOmDocument(
+                        ).addDocumentListener(text_area_listener);
+            }
+            sessionlog.GetLog().CloseEntry();
+            sessionlog.GetLog().NewEntry(newEntry);
         }
-        
-        if(caret_listener==null){
-            caret_listener=new CaretUpdateListener(sessionlog);
-            IntrospectionTools.getEditorTextArea().addCaretListener(
-                    caret_listener);
-        }
-        if(text_area_listener==null){
-            text_area_listener=new EditorTextAreaDocumentListener(sessionlog);
-            IntrospectionTools.getEditorTextArea().getOmDocument(
-                    ).addDocumentListener(text_area_listener);
-        }
-        sessionlog.GetLog().CloseEntry();
-        sessionlog.GetLog().NewEntry(newEntry);
     }
 }

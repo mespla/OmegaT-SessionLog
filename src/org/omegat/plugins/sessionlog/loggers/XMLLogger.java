@@ -28,6 +28,8 @@
 
 package org.omegat.plugins.sessionlog.loggers;
 
+import org.omegat.plugins.sessionlog.IntrospectionTools;
+import org.omegat.plugins.sessionlog.SessionLogPlugin;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
@@ -47,10 +49,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.omegat.core.Core;
 import org.omegat.core.data.SourceTextEntry;
-import org.omegat.gui.editor.Document3;
-import org.omegat.plugins.sessionlog.IntrospectionTools;
-import org.omegat.plugins.sessionlog.SessionLogPlugin;
-import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -62,7 +60,7 @@ public class XMLLogger implements BaseLogger{
     private Document log_document;
     
     private Element root_node;
-    
+        
     private Element current_project_node;
     
     private Element current_file_node;
@@ -91,33 +89,37 @@ public class XMLLogger implements BaseLogger{
     
     private int current_tm_proposal;
     
+    private int current_segment_number;
+    
+    private int current_glossary_entries;
+    
+    private int current_MT_entries;
+    
+    private int current_TM_entries;
+    
     static private DecimalFormat df = new DecimalFormat("#.###s", new DecimalFormatSymbols(Locale.ENGLISH));
     
     public XMLLogger(SessionLogPlugin sessionlog){
-        emtpy_mt_proposals=true;
-        emtpy_glossary_proposals=true;
-        current_tm_proposal=1;
-        emtpy_tm_proposals=true;
         this.sessionlog=sessionlog;
-        caretupdates_to_ignore=0;
-        edition_idx=0;
-        chosen_entry_time = -1;
-        edition_idx=0;
-        undomanager=new UndoManager();
+        Reset();
+    }
+    
+    @Override
+    public final void Reset(){
+        root_node=null;
+        current_file_node=null;
+        current_entry_node=null;
+        current_editions_node=null;
+        current_segment_number=-1;
+        current_glossary_entries=current_MT_entries=current_TM_entries=0;
         try {
-            DOMImplementation domImpl = DocumentBuilderFactory.newInstance(
-                    ).newDocumentBuilder().getDOMImplementation();
             log_document=DocumentBuilderFactory.newInstance(
                     ).newDocumentBuilder().newDocument();
             
-            //Starting the root node
             Element rootElement = log_document.createElement("log");
             log_document.appendChild(rootElement);
             root_node=rootElement;
-            current_project_node=null;
-            current_file_node=null;
-            current_entry_node=null;
-            current_editions_node=null;
+            
         } catch (ParserConfigurationException ex) {
             ex.printStackTrace(System.err);
         }
@@ -131,7 +133,7 @@ public class XMLLogger implements BaseLogger{
 
     @Override
     public void setCurrentTMProposals(int current_tm_proposal) {
-        if(this.current_tm_proposal!=current_tm_proposal){
+        if(current_editions_node!=null && this.current_tm_proposal!=current_tm_proposal){
             Element element = NewElement("NewTMRecommendationSelected", true);
             element.setAttribute("former", Integer.toString(this.current_tm_proposal));
             element.setAttribute("current", Integer.toString(current_tm_proposal));
@@ -142,11 +144,13 @@ public class XMLLogger implements BaseLogger{
 
     @Override
     public void setEmtpyGlossaryProposals(boolean emtpy_glossary_proposals) {
-        if(this.emtpy_glossary_proposals==true && emtpy_glossary_proposals==false){
-            Element element = NewElement("glossaryRecommendations", false);
+        if(current_entry_node!=null && this.emtpy_glossary_proposals==true &&
+                emtpy_glossary_proposals==false){
+            current_glossary_entries=IntrospectionTools.getGlossaryEntries().size();
+            /*Element element = NewElement("glossaryRecommendations", false);
             element.setAttribute("number", Integer.toString(
                     IntrospectionTools.getGlossaryEntries().size()));
-            current_entry_node.appendChild(element);
+            current_entry_node.appendChild(element);*/
         }
         this.emtpy_glossary_proposals=emtpy_glossary_proposals;
     }
@@ -157,11 +161,13 @@ public class XMLLogger implements BaseLogger{
      */
     @Override
     public void setEmtpyMTProposals(boolean emtpy_mt_proposals) {
-        if(this.emtpy_mt_proposals==true && emtpy_mt_proposals==false){
-            Element element = NewElement("MTRecommendations", false);
+        if(current_entry_node!=null && this.emtpy_mt_proposals==true &&
+                emtpy_mt_proposals==false){
+            current_MT_entries=IntrospectionTools.getMTEntriesSize();
+            /*Element element = NewElement("MTRecommendations", false);
             element.setAttribute("number", Integer.toString(
                     IntrospectionTools.getMTEntriesSize()));
-            current_entry_node.appendChild(element);
+            current_entry_node.appendChild(element);*/
         }
         this.emtpy_mt_proposals = emtpy_mt_proposals;
     }
@@ -172,10 +178,13 @@ public class XMLLogger implements BaseLogger{
 
     @Override
     public void setEmtpyTMProposals(boolean emtpy_tm_proposals) {
-        if(this.emtpy_tm_proposals==true && emtpy_tm_proposals==false){
-            Element element = NewElement("TMRecommendations", false);
-            element.setAttribute("number", Integer.toString(IntrospectionTools.getMatches().size()));
-            current_entry_node.appendChild(element);
+        if(current_editions_node!=null && this.emtpy_tm_proposals==true &&
+                emtpy_tm_proposals==false){
+            current_TM_entries=IntrospectionTools.getMatches().size();
+            /*Element element = NewElement("TMRecommendations", false);
+            element.setAttribute("number", Integer.toString(
+                    IntrospectionTools.getMatches().size()));
+            current_entry_node.appendChild(element);*/
             this.current_tm_proposal=1;
         }
         this.emtpy_tm_proposals = emtpy_tm_proposals;
@@ -197,29 +206,37 @@ public class XMLLogger implements BaseLogger{
     
     @Override
     public void Undo(){
-        int editionid = undomanager.Undo();
-        if(editionid>=0){
-            Element element = NewElement("undo", true);
-            StringBuilder sb=new StringBuilder("ID");
-            element.setAttribute("id", sb.append(Integer.toString(edition_idx)).toString());
-            sb=new StringBuilder("ID");
-            element.setAttribute("on_event", sb.append(Integer.toString(editionid)).toString());
-            current_editions_node.appendChild(element);
-            edition_idx++;
+        if(current_editions_node!=null){
+            int editionid = undomanager.Undo();
+            if(editionid>=0){
+                Element element = NewElement("undo", true);
+                StringBuilder sb=new StringBuilder("ID");
+                element.setAttribute("id", sb.append(Integer.toString(
+                        edition_idx)).toString());
+                sb=new StringBuilder("ID");
+                element.setAttribute("on_event", sb.append(Integer.toString(
+                        editionid)).toString());
+                current_editions_node.appendChild(element);
+                edition_idx++;
+            }
         }
     }
 
     @Override
     public void Redo(){
-        int editionid = undomanager.Redo();
-        if(editionid>=0){
-            Element element = NewElement("redo", true);
-            StringBuilder sb=new StringBuilder("ID");
-            element.setAttribute("id", sb.append(Integer.toString(edition_idx)).toString());
-            sb=new StringBuilder("ID");
-            element.setAttribute("on_event", sb.append(Integer.toString(editionid)).toString());
-            current_editions_node.appendChild(element);
-            edition_idx++;
+        if(current_editions_node!=null){
+            int editionid = undomanager.Redo();
+            if(editionid>=0){
+                Element element = NewElement("redo", true);
+                StringBuilder sb=new StringBuilder("ID");
+                element.setAttribute("id", sb.append(
+                        Integer.toString(edition_idx)).toString());
+                sb=new StringBuilder("ID");
+                element.setAttribute("on_event", sb.append(
+                        Integer.toString(editionid)).toString());
+                current_editions_node.appendChild(element);
+                edition_idx++;
+            }
         }
     }
     
@@ -230,9 +247,11 @@ public class XMLLogger implements BaseLogger{
         
     @Override
     public void SetPause(long increment){
-        Element element=NewElement("pause", true);
-        element.setAttribute("duration", df.format(increment/1000000000.0));
-        current_editions_node.appendChild(element);
+        if(current_editions_node!=null){
+            Element element=NewElement("pause", true);
+            element.setAttribute("duration", df.format(increment/1000000000.0));
+            current_editions_node.appendChild(element);
+        }
     }
     
     private Element NewElement(String nodename, boolean time){
@@ -244,46 +263,59 @@ public class XMLLogger implements BaseLogger{
             StringBuilder sb=new StringBuilder(dt.format(d));
             sb.append("UTC");
             element.setAttribute("time", sb.toString());
-            element.setAttribute("timestamp", Long.toString(System.currentTimeMillis()));
+            element.setAttribute("timestamp", Long.toString(
+                    System.currentTimeMillis()));
         }
         return element;
     }
     
     @Override
     public void NewProject() throws FileNotFoundException{
-        Element element = NewElement("project", true);
-        element.setAttribute("name", Core.getProject().getProjectProperties().getProjectName());
-        element.setAttribute("sl", Core.getProject().getProjectProperties().getSourceLanguage().getLanguageCode());
-        element.setAttribute("tl", Core.getProject().getProjectProperties().getTargetLanguage().getLanguageCode());
-        
-        current_project_node=element;
-        root_node.appendChild(current_project_node);
+        emtpy_mt_proposals=true;
+        emtpy_glossary_proposals=true;
+        current_tm_proposal=1;
+        emtpy_tm_proposals=true;
+        caretupdates_to_ignore=0;
+        edition_idx=0;
+        chosen_entry_time = -1;
+        edition_idx=0;
+        undomanager=new UndoManager();
+
+        //Starting the root node
+        Element rootElement = log_document.createElement("project");
+        rootElement.setAttribute("name", 
+                Core.getProject().getProjectProperties().getProjectName());
+        rootElement.setAttribute("sl", 
+                Core.getProject().getProjectProperties().getSourceLanguage(
+                ).getLanguageCode());
+        rootElement.setAttribute("tl", 
+                Core.getProject().getProjectProperties().getTargetLanguage(
+                ).getLanguageCode());
+
+        root_node.appendChild(rootElement);
+        current_project_node=rootElement;
         current_file_node=null;
+        current_entry_node=null;
         current_editions_node=null;
     }
     
     @Override
-    public void CloseProject() throws FileNotFoundException{
-        if(current_entry_node!=null && current_editions_node!=null &&
-                current_editions_node.getChildNodes().getLength()>0){
-            current_entry_node.appendChild(current_editions_node);
-            long time_consumed_entry=System.nanoTime()-chosen_entry_time;
-            
-            current_entry_node.setAttribute("duration",
-                    df.format(time_consumed_entry/1000000000.0));
-        }
-        current_project_node=null;
+    public void CloseProject(){
+        CloseEntry();
         current_file_node=null;
         current_editions_node=null;
     }
     
     @Override
     public void NewFile(String doc_name){
-        Element element = NewElement("file", true);
-        element.setAttribute("name", doc_name);
-        current_file_node=element;
-        current_project_node.appendChild(current_file_node);
-        current_editions_node=null;
+        if(current_project_node!=null){
+            Element element = NewElement("file", true);
+            element.setAttribute("name", doc_name);
+            current_file_node=element;
+            current_project_node.appendChild(current_file_node);
+            current_editions_node=null;
+            current_segment_number=-1;
+        }
     }
     
     @Override
@@ -292,9 +324,15 @@ public class XMLLogger implements BaseLogger{
             long time_consumed_entry=System.nanoTime()-chosen_entry_time;
             current_entry_node.setAttribute("duration", df.format(
                     time_consumed_entry/1000000000.0));
-            if(current_editions_node!=null &&
-                    current_editions_node.getChildNodes().getLength()>0)
-                current_entry_node.appendChild(current_editions_node);
+            Element element = NewElement("glossaryRecommendations", false);
+            element.setAttribute("number", Integer.toString(this.current_TM_entries));
+            current_entry_node.appendChild(element);
+            element = NewElement("MTRecommendations", false);
+            element.setAttribute("number", Integer.toString(this.current_MT_entries));
+            current_entry_node.appendChild(element);
+            element = NewElement("TMRecommendations", false);
+            element.setAttribute("number", Integer.toString(this.current_glossary_entries));
+            current_entry_node.appendChild(element);
             if(last_edited_text!=null){
                 Element target_element = NewElement("finalTarget", false);
                 target_element.appendChild(log_document.createTextNode(
@@ -309,12 +347,16 @@ public class XMLLogger implements BaseLogger{
                     current_entry_node.appendChild(target_element);
                 }
             }
+            if(current_editions_node!=null &&
+                    current_editions_node.getChildNodes().getLength()>0)
+                current_entry_node.appendChild(current_editions_node);
+            current_glossary_entries=current_MT_entries=current_TM_entries=0;
         }
     }
     
     @Override
     public void NewEntry(SourceTextEntry active_entry){
-        if(active_entry!=null){
+        if(current_file_node!=null && active_entry!=null){
             last_edited_text=Core.getEditor().getCurrentTranslation();
             caretupdates_to_ignore=1;
             sessionlog.GetMenu().setPauseTimestamp(0);
@@ -323,16 +365,24 @@ public class XMLLogger implements BaseLogger{
             element.setAttribute("number", Integer.toString(
                     Core.getEditor().getCurrentEntry().entryNum()));
             Element source_element = NewElement("source", false); 
-            source_element.appendChild(log_document.createTextNode(Core.getEditor().getCurrentEntry().getSrcText()));
+            source_element.appendChild(log_document.createTextNode(
+                    Core.getEditor().getCurrentEntry().getSrcText()));
             element.appendChild(source_element);
             Element target_element = NewElement("initialTarget", false);
-            target_element.appendChild(log_document.createTextNode(Core.getEditor().getCurrentTranslation()));
+            target_element.appendChild(log_document.createTextNode(
+                    Core.getEditor().getCurrentTranslation()));
             element.appendChild(target_element);
             current_entry_node = element;
             current_file_node.appendChild(current_entry_node);
             current_editions_node = NewElement("events", false);
             chosen_entry_time = System.nanoTime();
+            current_segment_number=Core.getEditor().getCurrentEntry().entryNum();
         }
+    }
+    
+    @Override
+    public int GetCurrentSegmentNumber(){
+        return current_segment_number;
     }
     
     @Override
@@ -358,12 +408,14 @@ public class XMLLogger implements BaseLogger{
         }
     }
     
-    private void NewEdition(int offset, String text, Element element, Document3 doc){
+    private void NewEdition(int offset, String text, Element element){
         //This is called since the method "isEditMode" in EditorController cannot be accessed
-        if(!IntrospectionTools.undoInProgress() && Core.getEditor().getCurrentTranslation()!=null){
+        if(!IntrospectionTools.undoInProgress() &&
+                Core.getEditor().getCurrentTranslation()!=null){
             caretupdates_to_ignore++;
             StringBuilder sb=new StringBuilder("ID");
-            element.setAttribute("id", sb.append(Integer.toString(edition_idx)).toString());
+            element.setAttribute("id", sb.append(
+                    Integer.toString(edition_idx)).toString());
             element.setAttribute("length", Integer.toString(text.length()));
             element.setAttribute("offset", Integer.toString(offset));
             element.appendChild(log_document.createTextNode(text));
@@ -375,72 +427,80 @@ public class XMLLogger implements BaseLogger{
     }
     
     @Override
-    public void NewInsertion(int offset, String text, Document3 doc){
-        NewEdition(offset, text, NewElement("insert", true), doc);
+    public void NewInsertion(int offset, String text){
+        if(current_editions_node!=null)
+            NewEdition(offset, text, NewElement("insert", true));
     }
     
     @Override
-    public void NewDeletion(int offset, String text, Document3 doc){
-        NewEdition(offset, text, NewElement("delete", true), doc);
+    public void NewDeletion(int offset, String text){
+        if(current_editions_node!=null)
+            NewEdition(offset, text, NewElement("delete", true));
     }
 
     @Override
     public void InsertFromTM(int offset, int tu_pos, String text,
-            int fms_stemming_onlywords, int fms_onlywords, int fms, Document3 doc){
-        Element element = NewElement("insert", true);
-        element.setAttribute("from", "TM");
-        element.setAttribute("fms_stemming_onlywords", Integer.toString(
-                fms_stemming_onlywords));
-        element.setAttribute("fms_onlywords", Integer.toString(fms_onlywords));
-        element.setAttribute("fms", Integer.toString(fms));
-        element.setAttribute("proposal_number", Integer.toString(tu_pos+1));
-        NewEdition(offset, text, element, doc);
+            int fms_stemming_onlywords, int fms_onlywords, int fms){
+        if(current_editions_node!=null){
+            Element element = NewElement("insert", true);
+            element.setAttribute("from", "TM");
+            element.setAttribute("fms_stemming_onlywords", Integer.toString(
+                    fms_stemming_onlywords));
+            element.setAttribute("fms_onlywords", Integer.toString(fms_onlywords));
+            element.setAttribute("fms", Integer.toString(fms));
+            element.setAttribute("proposal_number", Integer.toString(tu_pos+1));
+            NewEdition(offset, text, element);
+        }
     }
     
     @Override
     public void ReplaceFromTM(int offset, int tu_pos, String removedtext,
             String insertedtext, int fms_stemming_onlywords, int fms_onlywords,
-            int fms, Document3 doc){
-        this.current_editions_node.removeChild(
-                this.current_editions_node.getLastChild());
-        Element element = NewElement("delete", true);
-        element.setAttribute("from", "TM");
-        element.setAttribute("proposal_number", Integer.toString(tu_pos+1));
-        NewEdition(offset, removedtext, element, doc);
-        InsertFromTM(offset, tu_pos, insertedtext, fms_stemming_onlywords,
-                fms_onlywords, fms, doc);
-    }
-
-    @Override
-    public void ReplaceFromMT(int offset, String removedtext, String newtext,
-            Document3 doc){
-        Element element = NewElement("delete", true);
-        element.setAttribute("from", "MT");
-        NewEdition(offset, removedtext, element, doc);
-        element = NewElement("insert", true);
-        element.setAttribute("from", "MT");
-        NewEdition(offset, newtext, element, doc);
-    }
-
-    @Override
-    public void InsertFromGlossary(int offset, String newtext, Document3 doc){
-        Element element = (Element)current_editions_node.getLastChild();
-        current_editions_node.removeChild(current_editions_node.getLastChild());
-        element.setAttribute("from", "GLOSSARY");
-        
-        //If it was a replacement
-        Element element2 = (Element)current_editions_node.getLastChild();
-        if(element2.getNodeName().equals("delete") &&
-                element.getAttribute("offset").equals(element2.getAttribute("offset"))){
-            element2.setAttribute("from", "GLOSSARY");
+            int fms){
+        if(current_editions_node!=null){
+            this.current_editions_node.removeChild(
+                    this.current_editions_node.getLastChild());
+            Element element = NewElement("delete", true);
+            element.setAttribute("from", "TM");
+            element.setAttribute("proposal_number", Integer.toString(tu_pos+1));
+            NewEdition(offset, removedtext, element);
+            InsertFromTM(offset, tu_pos, insertedtext, fms_stemming_onlywords,
+                    fms_onlywords, fms);
         }
-        
-        current_editions_node.appendChild(element);
+    }
+
+    @Override
+    public void ReplaceFromMT(int offset, String removedtext, String newtext){
+        if(current_editions_node!=null){
+            Element element = NewElement("delete", true);
+            element.setAttribute("from", "MT");
+            NewEdition(offset, removedtext, element);
+            element = NewElement("insert", true);
+            element.setAttribute("from", "MT");
+            NewEdition(offset, newtext, element);
+        }
+    }
+
+    @Override
+    public void InsertFromGlossary(int offset, String newtext){
+        if(current_editions_node!=null){
+            Element element = (Element)current_editions_node.getLastChild();
+            current_editions_node.removeChild(current_editions_node.getLastChild());
+            element.setAttribute("from", "GLOSSARY");
+
+            //If it was a replacement
+            Element element2 = (Element)current_editions_node.getLastChild();
+            if(element2.getNodeName().equals("delete") &&
+                    element.getAttribute("offset").equals(element2.getAttribute("offset"))){
+                element2.setAttribute("from", "GLOSSARY");
+            }
+            current_editions_node.appendChild(element);
+        }
     }
 
     @Override
     public void CaretUpdate(int init_selection, int end_selection){
-        if(!IntrospectionTools.undoInProgress()){
+        if(current_editions_node!=null && !IntrospectionTools.undoInProgress()){
             if(caretupdates_to_ignore>0)
                 caretupdates_to_ignore--;
             else{

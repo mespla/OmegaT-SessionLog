@@ -28,8 +28,6 @@
 
 package org.omegat.plugins.sessionlog;
 
-import java.io.FileNotFoundException;
-import org.omegat.core.Core;
 import org.omegat.core.events.IProjectEventListener;
 
 /**
@@ -57,18 +55,19 @@ public class ProjectChangesListener implements IProjectEventListener {
      */
     @Override
     public void onProjectChanged(PROJECT_CHANGE_TYPE eventType) {
-        try {
-            if(eventType==PROJECT_CHANGE_TYPE.CLOSE){
-                sessionlog.GetMenu().pausetiming.setEnabled(false);
-                sessionlog.GetLog().CloseProject();
+        sessionlog.GetMenu().SetEnabledLogging(true);
+        if(eventType==PROJECT_CHANGE_TYPE.CLOSE){
+            sessionlog.GetLog().CloseProject();
+            if(sessionlog.GetMenu().isLoggerSelected()){
+                sessionlog.StopLogging();
+                sessionlog.GetMenu().SetEnabledPauseTiming(false);
             }
-            else if(eventType==PROJECT_CHANGE_TYPE.LOAD || eventType==PROJECT_CHANGE_TYPE.CREATE){
-                sessionlog.GetMenu().pausetiming.setEnabled(true);
-                sessionlog.GetLog().NewProject();
-                sessionlog.GetLog().NewFile(Core.getEditor().getCurrentFile());
+        }
+        else if(eventType==PROJECT_CHANGE_TYPE.LOAD || eventType==PROJECT_CHANGE_TYPE.CREATE){
+            if(sessionlog.GetMenu().isLoggerSelected()){
+                sessionlog.InitLogging();
+                sessionlog.GetMenu().SetEnabledPauseTiming(true);
             }
-        }catch (FileNotFoundException ex) {
-            ex.printStackTrace(System.err);
         }
     }
 }

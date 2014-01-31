@@ -55,7 +55,7 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter{
         try{
             String text_to_remove=fb.getDocument().getText(offset, length);
             int trans_start=doc.getTranslationStart();
-            sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove, doc);
+            sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove);
         }catch(NullPointerException ex){}
     }
 
@@ -66,7 +66,7 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter{
         Document3 doc=(Document3)fb.getDocument();
         try{
             int trans_start=doc.getTranslationStart();
-            sessionlog.GetLog().NewInsertion(offset-trans_start, string, doc);
+            sessionlog.GetLog().NewInsertion(offset-trans_start, string);
         }catch(NullPointerException ex){}
     }
     
@@ -86,25 +86,26 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter{
             
             if(offset==trans_start && length==trans_end-trans_start){
                 sessionlog.GetLog().ReplaceFromTM(offset-trans_start,
-                        IntrospectionTools.getActiveMatchIndex(), text_to_remove, text, scores.score,
-                        scores.scoreNoStem, scores.adjustedScore, doc);
+                        IntrospectionTools.getActiveMatchIndex(),
+                        text_to_remove, text, scores.score, scores.scoreNoStem,
+                        scores.adjustedScore);
             }
             else{
                 sessionlog.GetLog().InsertFromTM(offset-trans_start,
-                        IntrospectionTools.getActiveMatchIndex(), text, scores.score,
-                        scores.scoreNoStem, scores.adjustedScore, doc);
+                        IntrospectionTools.getActiveMatchIndex(), text,
+                        scores.score, scores.scoreNoStem, scores.adjustedScore);
             }
         }
         else if(Core.getMachineTranslatePane().getDisplayedTranslation()!=null &&
                 Core.getMachineTranslatePane().getDisplayedTranslation().equals(
                 text)){
             sessionlog.GetLog().ReplaceFromMT(offset-trans_start,
-                    text_to_remove, text, doc);
+                    text_to_remove, text);
         }
         else{
             if(length>0)
-                sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove, doc);
-            sessionlog.GetLog().NewInsertion(offset-trans_start, text, doc);
+                sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove);
+            sessionlog.GetLog().NewInsertion(offset-trans_start, text);
         }
         
         super.replace(fb, offset, length, text, attrs);

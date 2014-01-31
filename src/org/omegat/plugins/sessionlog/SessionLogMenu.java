@@ -31,7 +31,6 @@ package org.omegat.plugins.sessionlog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenuItem;
 import org.omegat.core.Core;
 import org.omegat.core.CoreEvents;
 import org.omegat.core.events.IApplicationEventListener;
@@ -49,20 +48,20 @@ public class SessionLogMenu {
     private SessionLogPlugin sessionlog;
 
     /** Option for pausing the timing. */
-    final JCheckBoxMenuItem pausetiming;
+    private final JCheckBoxMenuItem pausetiming;
     
-    final JMenuItem dump_log;
+    private final JCheckBoxMenuItem enable_logging;
+    
+    public void SetEnabledLogging(boolean enabled){
+        enable_logging.setEnabled(enabled);
+    }
+    
+    public void SetEnabledPauseTiming(boolean enabled){
+        pausetiming.setEnabled(enabled);
+    }
     
     /** Timestamp at the moment of the pause */
     private long pause_timestamp;
-
-    /**
-     * Method that returns the timestamp stored when a pause was started.
-     * @return Returns the timestamp stored when a pause was started
-     */
-    public long getPauseTimestamp() {
-        return pause_timestamp;
-    }
 
     /**
      * Method that sets a timestamp marking the beggining of a pause.
@@ -80,6 +79,10 @@ public class SessionLogMenu {
         return pausetiming;
     }
     
+    public boolean isLoggerSelected(){
+        return enable_logging.isSelected();
+    }
+    
     /**
      * Constructor of the class, which adds the option to the menu.
      * @param sessionlog Object that controls the coloring in the matcher.
@@ -88,21 +91,23 @@ public class SessionLogMenu {
         this.sessionlog=sessionlog;
         this.pause_timestamp=0;
         
-        this.pausetiming = new JCheckBoxMenuItem("SessionLog: pause timing");
+        this.pausetiming = new JCheckBoxMenuItem("Pause timing in SessionLog");
         this.pausetiming.addActionListener(pausetimingMenuItemActionListener);
         this.pausetiming.setSelected(false);
         this.pausetiming.setEnabled(false);
         
         
-        this.dump_log = new JMenuItem("Save the session log");
-        this.dump_log.addActionListener(dumplogMenuItemActionListener);
-        this.dump_log.setName("dump_log");
+        this.enable_logging = new JCheckBoxMenuItem("Enable SessionLog");
+        this.enable_logging.addActionListener(enableloggerMenuItemActionListener);
+        this.enable_logging.setName("dump_log");
+        this.enable_logging.setSelected(true);
+        this.enable_logging.setEnabled(false);
         
         CoreEvents.registerApplicationEventListener(new IApplicationEventListener(){
             @Override
             public void onApplicationStartup() {
                 Core.getMainWindow().getMainMenu().getOptionsMenu().add(pausetiming);
-                Core.getMainWindow().getMainMenu().getOptionsMenu().add(dump_log);
+                Core.getMainWindow().getMainMenu().getOptionsMenu().add(enable_logging);
             }
 
             @Override
@@ -155,10 +160,17 @@ public class SessionLogMenu {
      * Action listener that captures the action performed when the menu option
      * for dumping the session log to a file is activated.
      */
-    protected ActionListener dumplogMenuItemActionListener = new ActionListener() {
+    protected ActionListener enableloggerMenuItemActionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            sessionlog.PrintLog(false);
+            if(enable_logging.isSelected()){
+                pausetiming.setEnabled(true);
+                sessionlog.InitLogging();
+            }
+            else{
+                pausetiming.setEnabled(false);
+                sessionlog.StopLogging();
+            }
         }
     };
 }

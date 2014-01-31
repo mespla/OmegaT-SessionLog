@@ -32,7 +32,6 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Stack;
 import org.omegat.core.data.SourceTextEntry;
-import org.omegat.gui.editor.Document3;
 
 /**
  *
@@ -99,9 +98,11 @@ public interface BaseLogger {
         
     public abstract void SetPause(long increment);
     
+    public abstract int GetCurrentSegmentNumber();
+    
     public abstract void NewProject() throws FileNotFoundException;
     
-    public abstract void CloseProject() throws FileNotFoundException;
+    public abstract void CloseProject();
     
     public abstract void NewFile(String doc_name);
     
@@ -111,23 +112,23 @@ public interface BaseLogger {
     
     public abstract void DumpToWriter(PrintWriter pw);
     
-    public abstract void NewInsertion(int offset, String text, Document3 doc);
+    public abstract void NewInsertion(int offset, String text);
     
-    public abstract void NewDeletion(int offset, String text, Document3 doc);
+    public abstract void NewDeletion(int offset, String text);
 
     public abstract void InsertFromTM(int offset, int tu_pos, String text,
-            int fms_stemming_onlywords, int fms_onlywords, int fms,
-            Document3 doc);
+            int fms_stemming_onlywords, int fms_onlywords, int fms);
     
     public abstract void ReplaceFromTM(int offset, int tu_pos,
             String removedtext, String insertedtext, int fms_stemming_onlywords,
-            int fms_onlywords, int fms, Document3 doc);
+            int fms_onlywords, int fms);
 
     public abstract void ReplaceFromMT(int offset, String removedtext,
-            String newtext, Document3 doc);
+            String newtext);
 
-    public abstract void InsertFromGlossary(int offset, String newtext,
-            Document3 doc);
+    public abstract void InsertFromGlossary(int offset, String newtext);
 
     public abstract void CaretUpdate(int init_selection, int end_selection);
+    
+    public abstract void Reset();
 }

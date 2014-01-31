@@ -40,6 +40,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import org.omegat.core.Core;
 import org.omegat.core.CoreEvents;
+import org.omegat.core.data.NotLoadedProject;
 import org.omegat.core.events.IApplicationEventListener;
 import org.omegat.gui.editor.EditorTextArea3;
 import org.omegat.gui.glossary.GlossaryTextArea;
@@ -141,49 +142,61 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                     @Override
                     public void insertUpdate(DocumentEvent e) {
                         try {
-                            if(!e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                    sessionlog.GetLog().setEmtpyTMProposals(false);
+                            if(!e.getDocument().getText(
+                                    e.getDocument().getStartPosition(
+                                    ).getOffset(), e.getDocument().getEndPosition(
+                                    ).getOffset()).trim().isEmpty())
+                                sessionlog.GetLog().setEmtpyTMProposals(false);
                         } catch (BadLocationException ex) {}
                     }
 
                     @Override
                     public void removeUpdate(DocumentEvent e) {
                         try {
-                            if(e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
+                            if(e.getDocument().getText(e.getDocument(
+                                    ).getStartPosition().getOffset(
+                                    ), e.getDocument().getEndPosition(
+                                    ).getOffset()).trim().isEmpty())
                                 sessionlog.GetLog().setEmtpyTMProposals(true);
                         } catch (BadLocationException ex) {}
                     }
                 });
                 
-                matcher.getDocument().addDocumentListener(new DocumentListener(){
+                Core.getGlossary().getDocument().addDocumentListener(
+                        new DocumentListener(){
                     //When a change is registered, if the active match changed,
                     //the recommendations are re-computed
                     @Override
                     public void changedUpdate(DocumentEvent e) {
-                        int activeMatch=IntrospectionTools.getActiveMatchIndex();
-                        if(sessionlog.GetLog().getCurrentTMProposals()!=activeMatch+1){
-                            sessionlog.GetLog().setCurrentTMProposals(activeMatch+1);
-                        }
                     }
 
                     @Override
                     public void insertUpdate(DocumentEvent e) {
                         try {
-                            if(!e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                    sessionlog.GetLog().setEmtpyTMProposals(false);
+                            if(!e.getDocument().getText(e.getDocument(
+                                    ).getStartPosition().getOffset(
+                                    ), e.getDocument().getEndPosition(
+                                    ).getOffset()).trim().isEmpty())
+                                    sessionlog.GetLog(
+                                            ).setEmtpyGlossaryProposals(false);
                         } catch (BadLocationException ex) {}
                     }
 
                     @Override
                     public void removeUpdate(DocumentEvent e) {
                         try {
-                            if(e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                sessionlog.GetLog().setEmtpyTMProposals(true);
+                            if(e.getDocument().getText(e.getDocument(
+                                    ).getStartPosition().getOffset(
+                                    ), e.getDocument().getEndPosition(
+                                    ).getOffset()).trim().isEmpty())
+                                sessionlog.GetLog(
+                                        ).setEmtpyGlossaryProposals(true);
                         } catch (BadLocationException ex) {}
                     }
                 });
                 
-                Core.getGlossary().getDocument().addDocumentListener(new DocumentListener(){
+                Core.getMachineTranslatePane().getDocument(
+                        ).addDocumentListener(new DocumentListener(){
                     //When a change is registered, if the active match changed,
                     //the recommendations are re-computed
                     @Override
@@ -193,39 +206,21 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                     @Override
                     public void insertUpdate(DocumentEvent e) {
                         try {
-                            if(!e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                    sessionlog.GetLog().setEmtpyGlossaryProposals(false);
+                            if(!e.getDocument().getText(e.getDocument(
+                                    ).getStartPosition().getOffset(
+                                    ), e.getDocument().getEndPosition(
+                                    ).getOffset()).trim().isEmpty())
+                                sessionlog.GetLog().setEmtpyMTProposals(false);
                         } catch (BadLocationException ex) {}
                     }
 
                     @Override
                     public void removeUpdate(DocumentEvent e) {
                         try {
-                            if(e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                sessionlog.GetLog().setEmtpyGlossaryProposals(true);
-                        } catch (BadLocationException ex) {}
-                    }
-                });
-                
-                Core.getMachineTranslatePane().getDocument().addDocumentListener(new DocumentListener(){
-                    //When a change is registered, if the active match changed,
-                    //the recommendations are re-computed
-                    @Override
-                    public void changedUpdate(DocumentEvent e) {
-                    }
-
-                    @Override
-                    public void insertUpdate(DocumentEvent e) {
-                        try {
-                            if(!e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
-                                    sessionlog.GetLog().setEmtpyMTProposals(false);
-                        } catch (BadLocationException ex) {}
-                    }
-
-                    @Override
-                    public void removeUpdate(DocumentEvent e) {
-                        try {
-                            if(e.getDocument().getText(e.getDocument().getStartPosition().getOffset(), e.getDocument().getEndPosition().getOffset()).trim().isEmpty())
+                            if(e.getDocument().getText(e.getDocument(
+                                    ).getStartPosition().getOffset(
+                                    ), e.getDocument().getEndPosition(
+                                    ).getOffset()).trim().isEmpty())
                                 sessionlog.GetLog().setEmtpyMTProposals(true);
                         } catch (BadLocationException ex) {}
                     }
@@ -236,7 +231,9 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
 
     @Override
     public void onApplicationShutdown() {
-        sessionlog.PrintLog(true);
+        sessionlog.GetLog().CloseEntry();
+        if(!(Core.getProject() instanceof NotLoadedProject))
+            sessionlog.StopLogging();
     }
     
     class PopupListener extends MouseAdapter {
@@ -263,8 +260,8 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
                 String selTxt = glossaryTextArea.getSelectedText();
                 if (selTxt != null) {
                     EditorTextArea3 text=IntrospectionTools.getEditorTextArea();
-                    sessionlog.GetLog().InsertFromGlossary(text.getCaret().getDot(),
-                            selTxt, text.getOmDocument());  
+                    sessionlog.GetLog().InsertFromGlossary(
+                            text.getCaret().getDot(), selTxt);  
                 }
             }
         }
