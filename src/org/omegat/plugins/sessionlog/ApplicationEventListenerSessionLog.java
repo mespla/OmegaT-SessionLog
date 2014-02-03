@@ -73,7 +73,9 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
     }
 
     /**
-     * Event launched when the application is started up. This 
+     * Event launched when the application is started up. This method is launched
+     * when OmegaT is started up. The method intialises the logger, and adds all
+     * the listeners needed to control the events captured by the tool.
      */
     @Override
     public void onApplicationStartup() {
@@ -229,6 +231,10 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
         });
     }
 
+    /**
+     * Method lanuched when the application is shuten down. This method stops
+     * logging.
+     */
     @Override
     public void onApplicationShutdown() {
         sessionlog.GetLog().CloseEntry();
@@ -236,6 +242,9 @@ public class ApplicationEventListenerSessionLog implements IApplicationEventList
             sessionlog.StopLogging();
     }
     
+    /**
+     * Class used to capture the mouse interacion with the glossary text area.
+     */
     class PopupListener extends MouseAdapter {
 
         /** Glossary text area on which the mouse event is detected. */

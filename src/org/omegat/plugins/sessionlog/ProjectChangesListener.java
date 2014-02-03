@@ -37,7 +37,7 @@ import org.omegat.core.events.IProjectEventListener;
  */
 public class ProjectChangesListener implements IProjectEventListener {
     
-    /** SessionLog plugin object */
+    /** SessionLog plugin object. */
     private SessionLogPlugin sessionlog;
 
     /**

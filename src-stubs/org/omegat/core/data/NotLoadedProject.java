@@ -29,8 +29,19 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  *************************************************************************/
-package org.omegat.util;
+package org.omegat.core.data;
 
-public class StaticUtils {
-    public static String format(String str, Object... arguments) {return "";}
+import org.omegat.tokenizer.ITokenizer;
+
+public class NotLoadedProject implements IProject{
+
+    @Override
+    public ProjectProperties getProjectProperties() {return null;}
+
+    @Override
+    public ITokenizer getSourceTokenizer() {return null;}
+
+    @Override
+    public ITokenizer getTargetTokenizer() {return null;}
+    
 }

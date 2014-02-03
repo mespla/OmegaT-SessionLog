@@ -42,7 +42,8 @@ import org.omegat.gui.glossary.GlossaryTextArea;
 import org.omegat.gui.matches.MatchesTextArea;
 
 /**
- *
+ * Class that contains a set of methods that use introspection for getting the
+ * value of some of the private variables in OmegaT.
  * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
  */
 public class IntrospectionTools {

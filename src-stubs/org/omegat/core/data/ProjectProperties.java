@@ -43,5 +43,7 @@ public class ProjectProperties {
         return new Language("pl");
     }
     
-    public String getProjectName() { return ""; }
+    public String getProjectName() {return null;}
+    
+    public String getProjectRoot() {return null;}
 }

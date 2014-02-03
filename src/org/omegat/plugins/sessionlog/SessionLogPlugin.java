@@ -91,6 +91,10 @@ public class SessionLogPlugin {
         return xmllog;
     }
     
+    /**
+     * Method that initialises the logger. This method initialises the logger by
+     * opening the log file in the root of the project.
+     */
     public void InitLogging(){
         xmllog.Reset();
         
@@ -115,6 +119,10 @@ public class SessionLogPlugin {
         }
     }
     
+    /**
+     * Method that stops the logger. This method stops the logger by writing the
+     * current log into a file.
+     */
     public void StopLogging(){
         if(log_path!=null){
             try{
@@ -126,45 +134,6 @@ public class SessionLogPlugin {
             }
         }
     }
-    
-    /**
-     * Method that shows a dialog for choosing a path to a file where the log
-     * will be writen. This method allows the user to use an output file through
-     * a dialog; when the file is choosen, the current log is writen into the
-     * file.
-     * @param ask If this variable is <code>true</code>, the user is firstly
-     * queried about if he/she wants to save the log (if the user responds "no"
-     * the method ends without presenting the dialog to the user). Otherwise,
-     * the dialog is directly prompted to the used.
-     */
-     /*public void PrintLog() {
-        if(xmllog!=null){
-            GetLog().CloseEntry();
-            //If the user decides to store the session logger
-           boolean save=true;
-            if(ask){
-                int answer=JOptionPane.showConfirmDialog(null, "Do you want to store the"
-                    + " session log into a file?", "Session log",
-                    JOptionPane.YES_NO_OPTION);
-                if(answer != JOptionPane.YES_OPTION)
-                    save=false;
-            }
-            if(save){
-                //The output file is choosen
-                File f;
-                do{
-                    JFileChooser saveFile = new JFileChooser();
-                    saveFile.showSaveDialog(null);
-                    f = saveFile.getSelectedFile();
-                } while (f!=null && f.exists() && (JOptionPane.showConfirmDialog(null,
-                        "The choosen file already exists. Do you want to overwrite it?",
-                        "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION));
-                if(f!=null){*/
-            
-                /*}
-            }
-        }
-    }*/
     
     /**
      * This class implements a handler for the logger in order to capture the

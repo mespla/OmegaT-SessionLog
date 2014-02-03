@@ -50,12 +50,21 @@ public class SessionLogMenu {
     /** Option for pausing the timing. */
     private final JCheckBoxMenuItem pausetiming;
     
+    /** Option for activating/disactivating the logger. */
     private final JCheckBoxMenuItem enable_logging;
     
+    /**
+     * Method that enables/disables the logging option.
+     * @param enabled Value to set to the "enabled" logging option
+     */
     public void SetEnabledLogging(boolean enabled){
         enable_logging.setEnabled(enabled);
     }
     
+    /**
+     * Method that enables/disables the timing.
+     * @param enabled Value to set to the "enabled" option
+     */
     public void SetEnabledPauseTiming(boolean enabled){
         pausetiming.setEnabled(enabled);
     }
@@ -73,12 +82,18 @@ public class SessionLogMenu {
 
     /**
      * Method that returns the object in the menu used by the user to set a pause.
-     * @return Returns the <code>JCheckBoxMenuItem</code> object that is used by the user to set a pause
+     * @return Returns the <code>JCheckBoxMenuItem</code> object that is used by
+     * the user to set a pause
      */
     public JCheckBoxMenuItem getPausetiming() {
         return pausetiming;
     }
     
+    /**
+     * Mehtod that indicaties if the option for starting the logger is selected.
+     * @return Returns <code>true</code> if the logger option is selected and
+     * <code>false</code> otherwise.
+     */
     public boolean isLoggerSelected(){
         return enable_logging.isSelected();
     }
@@ -158,7 +173,7 @@ public class SessionLogMenu {
     
     /**
      * Action listener that captures the action performed when the menu option
-     * for dumping the session log to a file is activated.
+     * for starting/stopping the loger.
      */
     protected ActionListener enableloggerMenuItemActionListener = new ActionListener() {
         @Override
