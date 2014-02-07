@@ -2,13 +2,15 @@ INTRODUCTION
 ============
 
 The SessionLog plugin was created by Miquel Esplà-Gomis
-(mespla@dlsi.ua.es) at University of Alacant (www.ua.es)
-and is licensed under GPLv3. This is a plugin for OmegaT
-(htpp://www.omegat.org) translation memory tool, and is
-aimed at capturing the actions performed by a user when
-translating a document with OmegaT. The plugin produces,
-as an output, an XML log which contains a list of actions
-performed by the user in a translation project.
+(mespla@dlsi.ua.es), Mikel L. Forcada, and Felipe
+Sánchez-Martínez at University of Alacant (www.ua.es).
+and is licensed under GPLv3. This is a third-party plugin
+for OmegaT (http://www.omegat.org) translation memory tool,
+compatible with version 3.0 and higher, and is aimed at
+capturing the actions performed by a user when translating
+a document with OmegaT. The plugin produces, as an output,
+an XML log which contains a list of actions performed by
+the user in a translation project.
 
 A DTD describing the format of the XML log can be found at
 http://www.dlsi.ua.es/~mespla/DTD/OmegaT/sessionlog-omegat-0.9.dtd
