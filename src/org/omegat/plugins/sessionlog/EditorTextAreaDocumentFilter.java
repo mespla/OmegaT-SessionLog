@@ -56,7 +56,8 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter{
             String text_to_remove=fb.getDocument().getText(offset, length);
             int trans_start=doc.getTranslationStart();
             sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove);
-        }catch(NullPointerException ex){}
+        }catch(NullPointerException ex){
+        }catch(BadLocationException ex){}
     }
 
     @Override
