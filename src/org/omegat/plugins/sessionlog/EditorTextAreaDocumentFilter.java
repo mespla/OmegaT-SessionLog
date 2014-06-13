@@ -30,16 +30,17 @@ package org.omegat.plugins.sessionlog;
 
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DocumentFilter;
+import javax.swing.text.DocumentFilter.FilterBypass;
 import org.omegat.core.Core;
 import org.omegat.core.matching.NearString.Scores;
 import org.omegat.gui.editor.Document3;
+import org.omegat.gui.editor.DocumentFilter3;
 
 /**
  *
  * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
  */
-public class EditorTextAreaDocumentFilter extends DocumentFilter{
+public class EditorTextAreaDocumentFilter extends DocumentFilter3{
     
     SessionLogPlugin sessionlog;
     
@@ -50,25 +51,32 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter{
     @Override
     public void remove(FilterBypass fb, int offset, int length) throws
                        BadLocationException {
-        super.remove(fb, offset, length);
         Document3 doc=(Document3)fb.getDocument();
+        String text_to_remove="";
+        int trans_start=-1;
         try{
-            String text_to_remove=fb.getDocument().getText(offset, length);
-            int trans_start=doc.getTranslationStart();
-            sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove);
+            text_to_remove=fb.getDocument().getText(offset, length);
+            trans_start=doc.getTranslationStart();
         }catch(NullPointerException ex){
         }catch(BadLocationException ex){}
+        String old_text=Core.getEditor().getCurrentTranslation();
+        super.remove(fb, offset, length);
+        if(!Core.getEditor().getCurrentTranslation().equals(old_text))
+            sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove);
     }
 
     @Override
     public void insertString(FilterBypass fb, int offset, String string,
                              AttributeSet attr) throws BadLocationException {
-        super.insertString(fb, offset, string, attr);
         Document3 doc=(Document3)fb.getDocument();
+        int trans_start=-1;
         try{
-            int trans_start=doc.getTranslationStart();
-            sessionlog.GetLog().NewInsertion(offset-trans_start, string);
+            trans_start=doc.getTranslationStart();
         }catch(NullPointerException ex){}
+        String old_text=Core.getEditor().getCurrentTranslation();
+        super.insertString(fb, offset, string, attr);
+        if(!Core.getEditor().getCurrentTranslation().equals(old_text))
+            sessionlog.GetLog().NewInsertion(offset-trans_start, string);
     }
     
     @Override
