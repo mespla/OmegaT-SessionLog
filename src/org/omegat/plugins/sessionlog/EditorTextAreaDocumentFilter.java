@@ -35,6 +35,7 @@ import org.omegat.core.Core;
 import org.omegat.core.matching.NearString.Scores;
 import org.omegat.gui.editor.Document3;
 import org.omegat.gui.editor.DocumentFilter3;
+import org.omegat.gui.editor.EditorTextArea3;
 
 /**
  *
@@ -59,9 +60,10 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter3{
             trans_start=doc.getTranslationStart();
         }catch(NullPointerException ex){
         }catch(BadLocationException ex){}
-        String old_text=Core.getEditor().getCurrentTranslation();
+        String old_text = IntrospectionTools.getCurrentTranslation(); //Core.getEditor().getCurrentTranslation();
         super.remove(fb, offset, length);
-        if(!Core.getEditor().getCurrentTranslation().equals(old_text))
+        //if(!Core.getEditor().getCurrentTranslation().equals(old_text))
+        if(!IntrospectionTools.getCurrentTranslation().equals(old_text))
             sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove);
     }
 
@@ -73,9 +75,10 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter3{
         try{
             trans_start=doc.getTranslationStart();
         }catch(NullPointerException ex){}
-        String old_text=Core.getEditor().getCurrentTranslation();
+        String old_text=IntrospectionTools.getCurrentTranslation();
+        System.out.println(old_text);
         super.insertString(fb, offset, string, attr);
-        if(!Core.getEditor().getCurrentTranslation().equals(old_text))
+        if(!IntrospectionTools.getCurrentTranslation().equals(old_text))
             sessionlog.GetLog().NewInsertion(offset-trans_start, string);
     }
     
