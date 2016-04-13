@@ -28,10 +28,12 @@
 package org.omegat.plugins.sessionlog;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 import org.omegat.core.Core;
 import org.omegat.core.machinetranslators.BaseTranslate;
 import org.omegat.core.matching.NearString;
+import org.omegat.gui.editor.Document3;
 import org.omegat.gui.editor.EditorController;
 import org.omegat.gui.editor.EditorTextArea3;
 import org.omegat.gui.editor.TranslationUndoManager;
@@ -84,6 +86,28 @@ public class IntrospectionTools {
         }
         
         return editor_text_area;
+    }
+    
+        /**
+     * Method that returns the EditorTextArea3 object from <code>Core</code>.
+     * This method uses introspection to acces the private EditorTextArea3
+     * object in <code>Core</code> and return it. This should be idealy accessed
+     * in a different way (without introspection) but it is the only possibility
+     * by now.
+     * @return Returns the EditorTextArea3 object from <code>Core</code>
+     */
+    public static String getCurrentTranslation(){
+        String exit=null;
+        Document3 document=((EditorTextArea3)getEditorTextArea()).getOmDocument();
+        try{
+            Method m = document.getClass().getDeclaredMethod("getCurrentTranslation");
+        }
+        catch(NoSuchMethodException nsfe){
+            nsfe.printStackTrace(System.err);
+            System.exit(-1);
+        }
+        
+        return exit;
     }
     
     /**

@@ -42,7 +42,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import org.omegat.core.Core;
 import org.omegat.core.CoreEvents;
-import org.omegat.util.StaticUtils;
+import org.omegat.util.StringUtil;
 
 /**
  * SessionLog plugin main class. This class centralises the session logging.
@@ -165,7 +165,7 @@ public class SessionLogPlugin {
                 if (record.getParameters() == null || record.getParameters().length==0) {
                     message = format;
                 } else {
-                    message = StaticUtils.format(format, record.getParameters());
+                    message = StringUtil.format(format, record.getParameters());
                 }
                 try{
                     xmllog.LoggerEvent(code, record.getParameters()[0].toString(), message);
