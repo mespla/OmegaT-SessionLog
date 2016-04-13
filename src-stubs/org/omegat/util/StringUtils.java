@@ -21,6 +21,6 @@
  *************************************************************************/
 package org.omegat.util;
 
-public class StaticUtils {
+public class StringUtils {
     public static String format(String str, Object... arguments) {return "";}
 }
