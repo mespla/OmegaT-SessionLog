@@ -62,7 +62,8 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter3{
         }catch(BadLocationException ex){}
         String old_text = IntrospectionTools.getCurrentTranslation();
         super.remove(fb, offset, length);
-        if(!IntrospectionTools.getCurrentTranslation().equals(old_text))
+        String new_text = IntrospectionTools.getCurrentTranslation();
+        if(old_text!=null && new_text!=null && !new_text.equals(old_text))
             sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove);
     }
 
@@ -75,9 +76,9 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter3{
             trans_start=doc.getTranslationStart();
         }catch(NullPointerException ex){}
         String old_text=IntrospectionTools.getCurrentTranslation();
-        System.out.println(old_text);
         super.insertString(fb, offset, string, attr);
-        if(!IntrospectionTools.getCurrentTranslation().equals(old_text))
+        String new_text = IntrospectionTools.getCurrentTranslation();
+        if(old_text!=null && new_text!=null && new_text.equals(old_text))
             sessionlog.GetLog().NewInsertion(offset-trans_start, string);
     }
     
