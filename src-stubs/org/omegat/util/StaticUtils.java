@@ -21,6 +21,12 @@
  *************************************************************************/
 package org.omegat.util;
 
+import java.awt.event.KeyEvent;
+
 public class StaticUtils {
-    public static String format(String str, Object... arguments) {return "";}
+
+	public static boolean isKey(KeyEvent e, int vkUp, int i) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

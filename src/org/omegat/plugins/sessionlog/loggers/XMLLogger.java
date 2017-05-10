@@ -31,6 +31,9 @@ package org.omegat.plugins.sessionlog.loggers;
 import org.omegat.plugins.sessionlog.IntrospectionTools;
 import org.omegat.plugins.sessionlog.SessionLogPlugin;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -203,7 +206,20 @@ public class XMLLogger implements BaseLogger{
             edition_idx++;
         }
     }
-    
+
+    @Override
+    public void GenericEvent(String eventType, String code, String param, String message){
+        if(current_editions_node!=null){
+            Element element = NewElement(eventType, true);
+            if(code!=null)
+                element.setAttribute("code", code);
+                if(param!=null)
+                    element.setAttribute("object_name", param);
+            element.appendChild(log_document.createTextNode(message));
+            current_editions_node.appendChild(element);
+            edition_idx++;
+        }
+    }
     @Override
     public void Undo(){
         if(current_editions_node!=null){
@@ -400,10 +416,18 @@ public class XMLLogger implements BaseLogger{
             DOMSource source = new DOMSource(log_document);
             StreamResult result = new StreamResult(pw); 
             transformer.transform(source, result);
-            pw.close();
+            pw.close();            
         } catch (TransformerConfigurationException ex) {
             ex.printStackTrace(System.err);
         } catch (TransformerException ex) {
+        	ObjectOutputStream oos;
+			try {
+				oos = new ObjectOutputStream(new FileOutputStream("/tmp/java_document_dump"));
+	        	oos.writeObject(log_document);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             ex.printStackTrace(System.err);
         }
     }

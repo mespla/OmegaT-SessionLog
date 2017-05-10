@@ -55,6 +55,12 @@ public class SegmentChangedListener implements IEntryEventListener{
     /** Document listener that controls the editions on the segments after they are performed. */
     private EditorTextAreaDocumentListener text_area_listener;
 
+    /** The (potentially) only instance of this class */
+    public static SegmentChangedListener me;
+    
+    /** Keep track if we injected the listeners*/
+    private boolean isInjected = false;
+    
     /**
      * Overloaded constructor.
      * @param sessionlog SessionLog plugin class
@@ -63,6 +69,20 @@ public class SegmentChangedListener implements IEntryEventListener{
         this.filter=null;
         this.sessionlog=sessionlog;
         this.caret_listener=null;
+        this.text_area_listener = null;
+        
+        if (me != null)
+        {
+        	System.err.println("SegmentChangedListener is not unique.");
+        	System.exit(-1);
+        }
+        me = this;
+        
+        if(caret_listener==null){
+            caret_listener=new CaretUpdateListener(sessionlog);
+            IntrospectionTools.getEditorTextArea().addCaretListener(
+                    caret_listener);
+        }        
     }
 
     /**
@@ -71,7 +91,34 @@ public class SegmentChangedListener implements IEntryEventListener{
      */
     @Override
     public void onNewFile(String activeFileName) {
-        sessionlog.GetLog().NewFile(activeFileName);
+
+    	/**
+    	 * OmegaT does not notify any change of segment
+    	 * when loading a new file or project. Logger.closeProject()
+    	 * handles this, but there is no Logger.closeFile().
+    	 */
+    	sessionlog.GetLog().CloseEntry();
+    	
+		System.err.println("\t\tNew file " + activeFileName);
+		sessionlog.GetLog().NewFile(activeFileName);
+    	
+		isInjected = false;
+    }
+    
+    public void injectListeners()
+    {
+    	isInjected = true;
+        if(filter==null){
+            filter=new EditorTextAreaDocumentFilter(sessionlog);
+        }
+        IntrospectionTools.getEditorTextArea().getOmDocument(
+                ).setDocumentFilter(filter);
+
+        if(text_area_listener==null){
+            text_area_listener=new EditorTextAreaDocumentListener(sessionlog);
+        }
+        IntrospectionTools.getEditorTextArea().getOmDocument(
+                ).addDocumentListener(text_area_listener);
     }
 
     /**
@@ -81,22 +128,18 @@ public class SegmentChangedListener implements IEntryEventListener{
     @Override
     public void onEntryActivated(SourceTextEntry newEntry) {
         if(sessionlog.GetLog().GetCurrentSegmentNumber()!=Core.getEditor().getCurrentEntry().entryNum()){
-            if(filter==null){
-                filter=new EditorTextAreaDocumentFilter(sessionlog);
-                IntrospectionTools.getEditorTextArea().getOmDocument(
-                        ).setDocumentFilter(filter);
-            }
-
-            if(caret_listener==null){
-                caret_listener=new CaretUpdateListener(sessionlog);
-                IntrospectionTools.getEditorTextArea().addCaretListener(
-                        caret_listener);
-            }
-            if(text_area_listener==null){
-                text_area_listener=new EditorTextAreaDocumentListener(sessionlog);
-                IntrospectionTools.getEditorTextArea().getOmDocument(
-                        ).addDocumentListener(text_area_listener);
-            }
+        	
+        	/**
+        	 * Inject the listeners as late as possible. When the first
+        	 * project is loaded after OmegaT startup, OmDocument does 
+        	 * not exist when InitLogging is called (subsequent project
+        	 * loads do not trigger this behaviour).
+        	 */
+        	if (!isInjected)
+        	{
+        		injectListeners();
+        	}
+        	
             sessionlog.GetLog().CloseEntry();
             sessionlog.GetLog().NewEntry(newEntry);
         }

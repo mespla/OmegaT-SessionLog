@@ -28,18 +28,24 @@
 package org.omegat.plugins.sessionlog;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
+
 import org.omegat.core.Core;
 import org.omegat.core.machinetranslators.BaseTranslate;
 import org.omegat.core.matching.NearString;
+import org.omegat.gui.editor.Document3;
 import org.omegat.gui.editor.EditorController;
 import org.omegat.gui.editor.EditorTextArea3;
 import org.omegat.gui.editor.TranslationUndoManager;
+import org.omegat.gui.editor.autocompleter.AutoCompleter;
 import org.omegat.gui.exttrans.IMachineTranslation;
 import org.omegat.gui.exttrans.MachineTranslateTextArea;
 import org.omegat.gui.glossary.GlossaryEntry;
 import org.omegat.gui.glossary.GlossaryTextArea;
 import org.omegat.gui.matches.MatchesTextArea;
+import org.omegat.plugins.sessionlog.instrumented.InstrumentedAutoComplete;
 
 /**
  * Class that contains a set of methods that use introspection for getting the
@@ -84,6 +90,26 @@ public class IntrospectionTools {
         }
         
         return editor_text_area;
+    }
+    
+    public static String getCurrentTranslation(){
+    	String ret = null;
+    	
+    	Document3 doc = IntrospectionTools.getEditorTextArea().getOmDocument();
+    	Method m;
+    	
+    	try
+    	{
+    		m = Document3.class.getDeclaredMethod("extractTranslation", null);
+    		m.setAccessible(true);
+    		ret = (String) m.invoke(doc, null);
+    	}
+        catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException nsfe){
+            nsfe.printStackTrace(System.err);
+            System.exit(-1);
+        }
+    	
+    	return ret;
     }
     
     /**
@@ -217,5 +243,26 @@ public class IntrospectionTools {
         }
         
         return -1;
+    }
+    
+    public static void replaceAutoComplete()
+    {
+    	EditorTextArea3 editor = getEditorTextArea();
+    	Field f;
+    	AutoCompleter ac;
+    	InstrumentedAutoComplete iac;
+    	
+    	try {
+    		f = EditorTextArea3.class.getDeclaredField("autoCompleter");
+    		f.setAccessible(true);
+    		ac = (AutoCompleter) f.get(editor);
+    		iac = new InstrumentedAutoComplete(ac, editor);
+    		f.set(editor, iac);
+		}
+		catch (NoSuchFieldException | IllegalAccessException ex)
+		{
+			System.out.println("SessionLog error: replacing the autocompleter");
+		}
+    	
     }
 }

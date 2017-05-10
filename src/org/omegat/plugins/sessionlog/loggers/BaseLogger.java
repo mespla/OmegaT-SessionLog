@@ -90,6 +90,8 @@ public interface BaseLogger {
     
     public abstract void LoggerEvent(String code, String param, String message);
     
+    public abstract void GenericEvent(String eventType, String code, String param, String message);
+    
     public abstract void Undo();
 
     public abstract void Redo();

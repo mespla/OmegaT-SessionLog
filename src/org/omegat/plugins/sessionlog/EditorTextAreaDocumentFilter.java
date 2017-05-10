@@ -59,9 +59,11 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter3{
             trans_start=doc.getTranslationStart();
         }catch(NullPointerException ex){
         }catch(BadLocationException ex){}
-        String old_text=Core.getEditor().getCurrentTranslation();
+//        String old_text=Core.getEditor().getCurrentTranslation();
+        String old_text = IntrospectionTools.getCurrentTranslation();
         super.remove(fb, offset, length);
-        if(!Core.getEditor().getCurrentTranslation().equals(old_text))
+//        if(!Core.getEditor().getCurrentTranslation().equals(old_text))
+        if(old_text != null && !IntrospectionTools.getCurrentTranslation().equals(old_text))
             sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove);
     }
 
@@ -73,9 +75,11 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter3{
         try{
             trans_start=doc.getTranslationStart();
         }catch(NullPointerException ex){}
-        String old_text=Core.getEditor().getCurrentTranslation();
+//        String old_text=Core.getEditor().getCurrentTranslation();
+        String old_text=IntrospectionTools.getCurrentTranslation();
         super.insertString(fb, offset, string, attr);
-        if(!Core.getEditor().getCurrentTranslation().equals(old_text))
+//        if(!Core.getEditor().getCurrentTranslation().equals(old_text))
+        if(old_text != null && !IntrospectionTools.getCurrentTranslation().equals(old_text))
             sessionlog.GetLog().NewInsertion(offset-trans_start, string);
     }
     
@@ -88,7 +92,8 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter3{
         
         int trans_start=doc.getTranslationStart();
 
-        int trans_end=trans_start+Core.getEditor().getCurrentTranslation().length();
+//        int trans_end=trans_start+Core.getEditor().getCurrentTranslation().length();
+        int trans_end=trans_start+IntrospectionTools.getCurrentTranslation().length();
         if(Core.getMatcher().getActiveMatch()!=null && 
                 Core.getMatcher().getActiveMatch().translation.equals(text)){
             Scores scores=Core.getMatcher().getActiveMatch().scores[0];

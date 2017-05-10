@@ -43,6 +43,7 @@ import java.util.logging.Logger;
 import org.omegat.core.Core;
 import org.omegat.core.CoreEvents;
 import org.omegat.util.StaticUtils;
+import org.omegat.util.StringUtils;
 
 /**
  * SessionLog plugin main class. This class centralises the session logging.
@@ -56,9 +57,14 @@ public class SessionLogPlugin {
     private SessionLogMenu menu;
     
     /** Logger of the plugin. */
-    private BaseLogger xmllog;
+    private static BaseLogger xmllog;
     
     private String log_path;
+    
+    public static BaseLogger getLogger()
+    {
+    	return xmllog;
+    }
     
     /**
      * Constructor of the plugin. This constructor registers the
@@ -93,9 +99,11 @@ public class SessionLogPlugin {
     
     /**
      * Method that initialises the logger. This method initialises the logger by
-     * opening the log file in the root of the project.
+     * opening the log file in the root of the project. This method is called
+     * when a new project is selected.
      */
     public void InitLogging(){
+        IntrospectionTools.replaceAutoComplete();
         xmllog.Reset();
         
         //Flushing the data about the last entry edited
@@ -113,7 +121,19 @@ public class SessionLogPlugin {
         log_path=f.getAbsolutePath();
         try{
             xmllog.NewProject();
-            xmllog.NewFile(Core.getEditor().getCurrentFile());
+            
+            /** 
+             * This method is called whenever a project is loaded. Whenever
+             * a new project is loaded, the document (getOmDocument) is changed.
+             * OmegaT signals this using 2 different events:
+             * 	· when a new project is loaded, InitLogging
+             *  · when a new file inside a project is loaded, SegmentChangedListener.onNewFile
+             * To minimize code duplication, onNewFile() will have the responsibility of 
+             * pointing the listeners to the correct OmDocument and to log the file creation. 
+             */
+            
+            //xmllog.NewFile(Core.getEditor().getCurrentFile());
+            SegmentChangedListener.me.onNewFile(Core.getEditor().getCurrentFile());
         } catch(FileNotFoundException ex){
             ex.printStackTrace(System.err);
         }
@@ -165,7 +185,7 @@ public class SessionLogPlugin {
                 if (record.getParameters() == null || record.getParameters().length==0) {
                     message = format;
                 } else {
-                    message = StaticUtils.format(format, record.getParameters());
+                    message = StringUtils.format(format, record.getParameters());
                 }
                 try{
                     xmllog.LoggerEvent(code, record.getParameters()[0].toString(), message);
