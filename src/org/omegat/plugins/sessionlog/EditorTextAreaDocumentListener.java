@@ -34,31 +34,34 @@ import org.omegat.core.Core;
 
 /**
  * Event listener that manages the changes in the edition text area. This class
- * implements a <code>DocumentListener</code> to control the 
- * edition text area.
+ * implements a <code>DocumentListener</code> to control the edition text area.
+ * 
  * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
  */
-public class EditorTextAreaDocumentListener implements DocumentListener{
-    
-    SessionLogPlugin sessionlog;
-    
-    public EditorTextAreaDocumentListener(SessionLogPlugin sessionlog){
-        this.sessionlog=sessionlog;
-    }
+public class EditorTextAreaDocumentListener implements DocumentListener {
 
-    @Override
-    public void insertUpdate(DocumentEvent e) {
-        if(Core.getEditor().getCurrentTranslation()!=null)
-            sessionlog.GetLog().SetLastEditedText(Core.getEditor().getCurrentTranslation());
-    }
+	SessionLogPlugin sessionlog;
 
-    @Override
-    public void removeUpdate(DocumentEvent e) {
-        if(Core.getEditor().getCurrentTranslation()!=null)
-            sessionlog.GetLog().SetLastEditedText(Core.getEditor().getCurrentTranslation());
-    }
+	public EditorTextAreaDocumentListener(SessionLogPlugin sessionlog) {
+		this.sessionlog = sessionlog;
+	}
 
-    @Override
-    public void changedUpdate(DocumentEvent e) {}
-    
+	@Override
+	public void insertUpdate(DocumentEvent e) {
+		if (Core.getEditor().getCurrentTranslation() != null)
+			sessionlog.GetLog().SetLastEditedText(
+					Core.getEditor().getCurrentTranslation());
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent e) {
+		if (Core.getEditor().getCurrentTranslation() != null)
+			sessionlog.GetLog().SetLastEditedText(
+					Core.getEditor().getCurrentTranslation());
+	}
+
+	@Override
+	public void changedUpdate(DocumentEvent e) {
+	}
+
 }

@@ -51,228 +51,271 @@ import org.omegat.gui.matches.MatchesTextArea;
 /**
  * Class that extends an <code>IApplicationEventListener</code> object, and
  * performs the actions needed for starting the collection of listeners used to
- * capture the session events.
- * This class overwrites the methods <code>onApplicationStartup</code>, which
- * registers some listeners needed for capturing the session events at the start
- * of the application, and <code>
+ * capture the session events. This class overwrites the methods
+ * <code>onApplicationStartup</code>, which registers some listeners needed for
+ * capturing the session events at the start of the application, and <code>
  * onApplicationShutdown</code> which creates the XML file containing all the
  * information obtained during the translation.
+ * 
  * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
  */
-public class ApplicationEventListenerSessionLog implements IApplicationEventListener{
-    
-    /** Plugin class from which this class is created */
-    SessionLogPlugin sessionlog;
+public class ApplicationEventListenerSessionLog
+		implements IApplicationEventListener {
 
-    /**
-     * Overloaded constructor of the class.
-     * @param sessionlog Plugin class from which this class is created
-     */
-    public ApplicationEventListenerSessionLog(SessionLogPlugin sessionlog) {
-        this.sessionlog = sessionlog;
-    }
+	/** Plugin class from which this class is created */
+	SessionLogPlugin sessionlog;
 
-    /**
-     * Event launched when the application is started up. This method is launched
-     * when OmegaT is started up. The method intialises the logger, and adds all
-     * the listeners needed to control the events captured by the tool.
-     */
-    @Override
-    public void onApplicationStartup() {
-        CoreEvents.registerProjectChangeListener(new ProjectChangesListener(sessionlog));
-        CoreEvents.registerEntryEventListener(new SegmentChangedListener(sessionlog));
-        SwingUtilities.invokeLater(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                Field editUndoMenuItemField;
-                Field editRedoMenuItemField;
-                try{
-                    editUndoMenuItemField =
-                            MainWindowMenu.class.getDeclaredField("editUndoMenuItem");
-                    editRedoMenuItemField =
-                            MainWindowMenu.class.getDeclaredField("editRedoMenuItem");
-                    
-                    //Setting it accessible
-                    editUndoMenuItemField.setAccessible(true);
-                    editRedoMenuItemField.setAccessible(true);
-                    try{
-                        JMenuItem editUndoMenuItem;
-                        JMenuItem editRedoMenuItem;
-                        MainWindowMenu mmenu=(MainWindowMenu)((MainWindow)
-                                Core.getMainWindow()).getMainMenu();
-                        editUndoMenuItem=(JMenuItem)editUndoMenuItemField.get(mmenu);
-                        editRedoMenuItem=(JMenuItem)editRedoMenuItemField.get(mmenu);
-                        editUndoMenuItem.addActionListener(new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                sessionlog.GetLog().Undo();
-                            }
-                        });
-                        editRedoMenuItem.addActionListener(new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                sessionlog.GetLog().Redo();
-                            }
-                        });
-                    }
-                    catch(IllegalAccessException iae){
-                        iae.printStackTrace(System.err);
-                        System.exit(-1);
-                    }
-                }
-                catch(NoSuchFieldException nsfe){
-                    nsfe.printStackTrace(System.err);
-                    System.exit(-1);
-                }
-                
-                Core.getGlossary().addMouseListener(new PopupListener(Core.getGlossary()));
+	/**
+	 * Overloaded constructor of the class.
+	 * 
+	 * @param sessionlog
+	 *            Plugin class from which this class is created
+	 */
+	public ApplicationEventListenerSessionLog(SessionLogPlugin sessionlog) {
+		this.sessionlog = sessionlog;
+	}
 
-                MatchesTextArea matcher=(MatchesTextArea)Core.getMatcher();
-                matcher.getDocument().addDocumentListener(new DocumentListener(){
-                    //When a change is registered, if the active match changed,
-                    //the recommendations are re-computed
-                    @Override
-                    public void changedUpdate(DocumentEvent e) {
-                        int activeMatch=IntrospectionTools.getActiveMatchIndex();
-                        if(sessionlog.GetLog().getCurrentTMProposals()!=activeMatch+1){
-                            sessionlog.GetLog().setCurrentTMProposals(activeMatch+1);
-                        }
-                    }
+	/**
+	 * Event launched when the application is started up. This method is
+	 * launched when OmegaT is started up. The method intialises the logger, and
+	 * adds all the listeners needed to control the events captured by the tool.
+	 */
+	@Override
+	public void onApplicationStartup() {
+		CoreEvents.registerProjectChangeListener(
+				new ProjectChangesListener(sessionlog));
+		CoreEvents.registerEntryEventListener(
+				new SegmentChangedListener(sessionlog));
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				Field editUndoMenuItemField;
+				Field editRedoMenuItemField;
+				try {
+					editUndoMenuItemField = MainWindowMenu.class
+							.getDeclaredField("editUndoMenuItem");
+					editRedoMenuItemField = MainWindowMenu.class
+							.getDeclaredField("editRedoMenuItem");
 
-                    @Override
-                    public void insertUpdate(DocumentEvent e) {
-                        try {
-                            if(!e.getDocument().getText(
-                                    e.getDocument().getStartPosition(
-                                    ).getOffset(), e.getDocument().getEndPosition(
-                                    ).getOffset()).trim().isEmpty())
-                                sessionlog.GetLog().setEmtpyTMProposals(false);
-                        } catch (BadLocationException ex) {}
-                    }
+					// Setting it accessible
+					editUndoMenuItemField.setAccessible(true);
+					editRedoMenuItemField.setAccessible(true);
+					try {
+						JMenuItem editUndoMenuItem;
+						JMenuItem editRedoMenuItem;
+						MainWindowMenu mmenu = (MainWindowMenu) ((MainWindow) Core
+								.getMainWindow()).getMainMenu();
+						editUndoMenuItem = (JMenuItem) editUndoMenuItemField
+								.get(mmenu);
+						editRedoMenuItem = (JMenuItem) editRedoMenuItemField
+								.get(mmenu);
+						editUndoMenuItem
+								.addActionListener(new ActionListener() {
+									@Override
+									public void actionPerformed(ActionEvent e) {
+										sessionlog.GetLog().Undo();
+									}
+								});
+						editRedoMenuItem
+								.addActionListener(new ActionListener() {
+									@Override
+									public void actionPerformed(ActionEvent e) {
+										sessionlog.GetLog().Redo();
+									}
+								});
+					} catch (IllegalAccessException iae) {
+						iae.printStackTrace(System.err);
+						System.exit(-1);
+					}
+				} catch (NoSuchFieldException nsfe) {
+					nsfe.printStackTrace(System.err);
+					System.exit(-1);
+				}
 
-                    @Override
-                    public void removeUpdate(DocumentEvent e) {
-                        try {
-                            if(e.getDocument().getText(e.getDocument(
-                                    ).getStartPosition().getOffset(
-                                    ), e.getDocument().getEndPosition(
-                                    ).getOffset()).trim().isEmpty())
-                                sessionlog.GetLog().setEmtpyTMProposals(true);
-                        } catch (BadLocationException ex) {}
-                    }
-                });
-                
-                Core.getGlossary().getDocument().addDocumentListener(
-                        new DocumentListener(){
-                    //When a change is registered, if the active match changed,
-                    //the recommendations are re-computed
-                    @Override
-                    public void changedUpdate(DocumentEvent e) {
-                    }
+				Core.getGlossary().addMouseListener(
+						new PopupListener(Core.getGlossary()));
 
-                    @Override
-                    public void insertUpdate(DocumentEvent e) {
-                        try {
-                            if(!e.getDocument().getText(e.getDocument(
-                                    ).getStartPosition().getOffset(
-                                    ), e.getDocument().getEndPosition(
-                                    ).getOffset()).trim().isEmpty())
-                                    sessionlog.GetLog(
-                                            ).setEmtpyGlossaryProposals(false);
-                        } catch (BadLocationException ex) {}
-                    }
+				MatchesTextArea matcher = (MatchesTextArea) Core.getMatcher();
+				matcher.getDocument()
+						.addDocumentListener(new DocumentListener() {
+							// When a change is registered, if the active match
+							// changed,
+							// the recommendations are re-computed
+							@Override
+							public void changedUpdate(DocumentEvent e) {
+								int activeMatch = IntrospectionTools
+										.getActiveMatchIndex();
+								if (sessionlog.GetLog()
+										.getCurrentTMProposals() != activeMatch
+												+ 1) {
+									sessionlog.GetLog().setCurrentTMProposals(
+											activeMatch + 1);
+								}
+							}
 
-                    @Override
-                    public void removeUpdate(DocumentEvent e) {
-                        try {
-                            if(e.getDocument().getText(e.getDocument(
-                                    ).getStartPosition().getOffset(
-                                    ), e.getDocument().getEndPosition(
-                                    ).getOffset()).trim().isEmpty())
-                                sessionlog.GetLog(
-                                        ).setEmtpyGlossaryProposals(true);
-                        } catch (BadLocationException ex) {}
-                    }
-                });
-                
-                Core.getMachineTranslatePane().getDocument(
-                        ).addDocumentListener(new DocumentListener(){
-                    //When a change is registered, if the active match changed,
-                    //the recommendations are re-computed
-                    @Override
-                    public void changedUpdate(DocumentEvent e) {
-                    }
+							@Override
+							public void insertUpdate(DocumentEvent e) {
+								try {
+									if (!e.getDocument().getText(
+											e.getDocument().getStartPosition()
+													.getOffset(),
+											e.getDocument().getEndPosition()
+													.getOffset())
+											.trim().isEmpty())
+										sessionlog.GetLog()
+												.setEmtpyTMProposals(false);
+								} catch (BadLocationException ex) {
+								}
+							}
 
-                    @Override
-                    public void insertUpdate(DocumentEvent e) {
-                        try {
-                            if(!e.getDocument().getText(e.getDocument(
-                                    ).getStartPosition().getOffset(
-                                    ), e.getDocument().getEndPosition(
-                                    ).getOffset()).trim().isEmpty())
-                                sessionlog.GetLog().setEmtpyMTProposals(false);
-                        } catch (BadLocationException ex) {}
-                    }
+							@Override
+							public void removeUpdate(DocumentEvent e) {
+								try {
+									if (e.getDocument().getText(
+											e.getDocument().getStartPosition()
+													.getOffset(),
+											e.getDocument().getEndPosition()
+													.getOffset())
+											.trim().isEmpty())
+										sessionlog.GetLog()
+												.setEmtpyTMProposals(true);
+								} catch (BadLocationException ex) {
+								}
+							}
+						});
 
-                    @Override
-                    public void removeUpdate(DocumentEvent e) {
-                        try {
-                            if(e.getDocument().getText(e.getDocument(
-                                    ).getStartPosition().getOffset(
-                                    ), e.getDocument().getEndPosition(
-                                    ).getOffset()).trim().isEmpty())
-                                sessionlog.GetLog().setEmtpyMTProposals(true);
-                        } catch (BadLocationException ex) {}
-                    }
-                });
-            }
-        });
-    }
+				Core.getGlossary().getDocument()
+						.addDocumentListener(new DocumentListener() {
+							// When a change is registered, if the active match
+							// changed,
+							// the recommendations are re-computed
+							@Override
+							public void changedUpdate(DocumentEvent e) {
+							}
 
-    /**
-     * Method lanuched when the application is shuten down. This method stops
-     * logging.
-     */
-    @Override
-    public void onApplicationShutdown() {
-        sessionlog.GetLog().CloseEntry();
-        if(!(Core.getProject() instanceof NotLoadedProject))
-            sessionlog.StopLogging();
-    }
-    
-    /**
-     * Class used to capture the mouse interacion with the glossary text area.
-     */
-    class PopupListener extends MouseAdapter {
+							@Override
+							public void insertUpdate(DocumentEvent e) {
+								try {
+									if (!e.getDocument().getText(
+											e.getDocument().getStartPosition()
+													.getOffset(),
+											e.getDocument().getEndPosition()
+													.getOffset())
+											.trim().isEmpty())
+										sessionlog.GetLog()
+												.setEmtpyGlossaryProposals(
+														false);
+								} catch (BadLocationException ex) {
+								}
+							}
 
-        /** Glossary text area on which the mouse event is detected. */
-        private GlossaryTextArea glossaryTextArea;
+							@Override
+							public void removeUpdate(DocumentEvent e) {
+								try {
+									if (e.getDocument().getText(
+											e.getDocument().getStartPosition()
+													.getOffset(),
+											e.getDocument().getEndPosition()
+													.getOffset())
+											.trim().isEmpty())
+										sessionlog.GetLog()
+												.setEmtpyGlossaryProposals(
+														true);
+								} catch (BadLocationException ex) {
+								}
+							}
+						});
 
-        /**
-         * Overloaded constructor of the class.
-         * @param gte Glossary text area on which the mouse event is detected
-         */
-        public PopupListener(GlossaryTextArea gte) {
-            super();
-            glossaryTextArea = gte;
-        }
+				Core.getMachineTranslatePane().getDocument()
+						.addDocumentListener(new DocumentListener() {
+							// When a change is registered, if the active match
+							// changed,
+							// the recommendations are re-computed
+							@Override
+							public void changedUpdate(DocumentEvent e) {
+							}
 
-        /**
-         * Class that captures an action when clicking with the mouse.
-         * @param e Event launched
-         */
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            if (e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON3) {
-                String selTxt = glossaryTextArea.getSelectedText();
-                if (selTxt != null) {
-                    EditorTextArea3 text=IntrospectionTools.getEditorTextArea();
-                    sessionlog.GetLog().InsertFromGlossary(
-                            text.getCaret().getDot(), selTxt);  
-                }
-            }
-        }
-    }
+							@Override
+							public void insertUpdate(DocumentEvent e) {
+								try {
+									if (!e.getDocument().getText(
+											e.getDocument().getStartPosition()
+													.getOffset(),
+											e.getDocument().getEndPosition()
+													.getOffset())
+											.trim().isEmpty())
+										sessionlog.GetLog()
+												.setEmtpyMTProposals(false);
+								} catch (BadLocationException ex) {
+								}
+							}
+
+							@Override
+							public void removeUpdate(DocumentEvent e) {
+								try {
+									if (e.getDocument().getText(
+											e.getDocument().getStartPosition()
+													.getOffset(),
+											e.getDocument().getEndPosition()
+													.getOffset())
+											.trim().isEmpty())
+										sessionlog.GetLog()
+												.setEmtpyMTProposals(true);
+								} catch (BadLocationException ex) {
+								}
+							}
+						});
+			}
+		});
+	}
+
+	/**
+	 * Method lanuched when the application is shuten down. This method stops
+	 * logging.
+	 */
+	@Override
+	public void onApplicationShutdown() {
+		sessionlog.GetLog().CloseEntry();
+		if (!(Core.getProject() instanceof NotLoadedProject))
+			sessionlog.StopLogging();
+	}
+
+	/**
+	 * Class used to capture the mouse interacion with the glossary text area.
+	 */
+	class PopupListener extends MouseAdapter {
+
+		/** Glossary text area on which the mouse event is detected. */
+		private GlossaryTextArea glossaryTextArea;
+
+		/**
+		 * Overloaded constructor of the class.
+		 * 
+		 * @param gte
+		 *            Glossary text area on which the mouse event is detected
+		 */
+		public PopupListener(GlossaryTextArea gte) {
+			super();
+			glossaryTextArea = gte;
+		}
+
+		/**
+		 * Class that captures an action when clicking with the mouse.
+		 * 
+		 * @param e
+		 *            Event launched
+		 */
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if (e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON3) {
+				String selTxt = glossaryTextArea.getSelectedText();
+				if (selTxt != null) {
+					EditorTextArea3 text = IntrospectionTools
+							.getEditorTextArea();
+					sessionlog.GetLog().InsertFromGlossary(
+							text.getCaret().getDot(), selTxt);
+				}
+			}
+		}
+	}
 }

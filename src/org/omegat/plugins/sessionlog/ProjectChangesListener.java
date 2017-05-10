@@ -33,41 +33,46 @@ import org.omegat.core.events.IProjectEventListener;
 /**
  * Project event listener that captures the event launched when any change is
  * performed on an OmegaT project.
+ * 
  * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
  */
 public class ProjectChangesListener implements IProjectEventListener {
-    
-    /** SessionLog plugin object. */
-    private SessionLogPlugin sessionlog;
 
-    /**
-     * Constructor of the class.
-     * @param sessionlog SessionLog plugin object
-     */
-    public ProjectChangesListener(SessionLogPlugin sessionlog) {
-        this.sessionlog = sessionlog;
-    }
+	/** SessionLog plugin object. */
+	private SessionLogPlugin sessionlog;
 
-    /**
-     * Method that captures the event launched when a change is performe done an
-     * OmegaT project.
-     * @param eventType Type of the changed perfomred on the project
-     */
-    @Override
-    public void onProjectChanged(PROJECT_CHANGE_TYPE eventType) {
-        sessionlog.GetMenu().SetEnabledLogging(true);
-        if(eventType==PROJECT_CHANGE_TYPE.CLOSE){
-            sessionlog.GetLog().CloseProject();
-            if(sessionlog.GetMenu().isLoggerSelected()){
-                sessionlog.StopLogging();
-                sessionlog.GetMenu().SetEnabledPauseTiming(false);
-            }
-        }
-        else if(eventType==PROJECT_CHANGE_TYPE.LOAD || eventType==PROJECT_CHANGE_TYPE.CREATE){
-            if(sessionlog.GetMenu().isLoggerSelected()){
-                sessionlog.InitLogging();
-                sessionlog.GetMenu().SetEnabledPauseTiming(true);
-            }
-        }
-    }
+	/**
+	 * Constructor of the class.
+	 * 
+	 * @param sessionlog
+	 *            SessionLog plugin object
+	 */
+	public ProjectChangesListener(SessionLogPlugin sessionlog) {
+		this.sessionlog = sessionlog;
+	}
+
+	/**
+	 * Method that captures the event launched when a change is performe done an
+	 * OmegaT project.
+	 * 
+	 * @param eventType
+	 *            Type of the changed perfomred on the project
+	 */
+	@Override
+	public void onProjectChanged(PROJECT_CHANGE_TYPE eventType) {
+		sessionlog.GetMenu().SetEnabledLogging(true);
+		if (eventType == PROJECT_CHANGE_TYPE.CLOSE) {
+			sessionlog.GetLog().CloseProject();
+			if (sessionlog.GetMenu().isLoggerSelected()) {
+				sessionlog.StopLogging();
+				sessionlog.GetMenu().SetEnabledPauseTiming(false);
+			}
+		} else if (eventType == PROJECT_CHANGE_TYPE.LOAD
+				|| eventType == PROJECT_CHANGE_TYPE.CREATE) {
+			if (sessionlog.GetMenu().isLoggerSelected()) {
+				sessionlog.InitLogging();
+				sessionlog.GetMenu().SetEnabledPauseTiming(true);
+			}
+		}
+	}
 }

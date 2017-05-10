@@ -40,37 +40,46 @@ import org.omegat.gui.editor.EditorTextArea3;
  * implements a <code>DocumentListener</code> to control the edition text area.
  * All the insertions and deletions are registered to be stored in the session
  * log.
+ * 
  * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
  */
-public class CaretUpdateListener implements CaretListener{
+public class CaretUpdateListener implements CaretListener {
 
-    /** Session log plugin object */
-    private SessionLogPlugin sessionlog;
-    
-    /**
-     * Constructor of the class.
-     * @param sessionlog SessionLog plugin object
-     */
-    public CaretUpdateListener(SessionLogPlugin sessionlog) {
-        this.sessionlog = sessionlog;
-    }
+	/** Session log plugin object */
+	private SessionLogPlugin sessionlog;
 
-    /**
-     * Method launched when the caret is updated.
-     * @param e Caret update which triggers this event
-     */
-    @Override
-    public void caretUpdate(CaretEvent e) {
-        Document3 doc=((EditorTextArea3)e.getSource()).getOmDocument();
-        if(doc!=null){
-            //This is called since the method "isEditMode" in EditorController cannot be accessed
-            if(((EditorController)Core.getEditor()).getCurrentTranslation()!=null){
-                int start_trans=doc.getTranslationStart();
-                int end_trans=start_trans+Core.getEditor().getCurrentTranslation().length();
-                if(e.getDot()>=start_trans && e.getDot()<=end_trans){
-                    sessionlog.GetLog().CaretUpdate(e.getMark()+1, e.getDot()+1);
-                }
-            }
-        }
-    }
+	/**
+	 * Constructor of the class.
+	 * 
+	 * @param sessionlog
+	 *            SessionLog plugin object
+	 */
+	public CaretUpdateListener(SessionLogPlugin sessionlog) {
+		this.sessionlog = sessionlog;
+	}
+
+	/**
+	 * Method launched when the caret is updated.
+	 * 
+	 * @param e
+	 *            Caret update which triggers this event
+	 */
+	@Override
+	public void caretUpdate(CaretEvent e) {
+		Document3 doc = ((EditorTextArea3) e.getSource()).getOmDocument();
+		if (doc != null) {
+			// This is called since the method "isEditMode" in EditorController
+			// cannot be accessed
+			if (((EditorController) Core.getEditor())
+					.getCurrentTranslation() != null) {
+				int start_trans = doc.getTranslationStart();
+				int end_trans = start_trans
+						+ Core.getEditor().getCurrentTranslation().length();
+				if (e.getDot() >= start_trans && e.getDot() <= end_trans) {
+					sessionlog.GetLog().CaretUpdate(e.getMark() + 1,
+							e.getDot() + 1);
+				}
+			}
+		}
+	}
 }

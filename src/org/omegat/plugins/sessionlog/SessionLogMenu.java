@@ -41,151 +41,165 @@ import org.omegat.gui.matches.MatchesTextArea;
  * pausing" option in the "options" menu of the main menu of OmegaT. When this
  * option is choosed, the entry edition timing is stopped. During a pause, the
  * edition text are is disabled, so no changes can be done on the translation.
+ * 
  * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
  */
 public class SessionLogMenu {
-    
-    private SessionLogPlugin sessionlog;
 
-    /** Option for pausing the timing. */
-    private final JCheckBoxMenuItem pausetiming;
-    
-    /** Option for activating/disactivating the logger. */
-    private final JCheckBoxMenuItem enable_logging;
-    
-    /**
-     * Method that enables/disables the logging option.
-     * @param enabled Value to set to the "enabled" logging option
-     */
-    public void SetEnabledLogging(boolean enabled){
-        enable_logging.setEnabled(enabled);
-    }
-    
-    /**
-     * Method that enables/disables the timing.
-     * @param enabled Value to set to the "enabled" option
-     */
-    public void SetEnabledPauseTiming(boolean enabled){
-        pausetiming.setEnabled(enabled);
-    }
-    
-    /** Timestamp at the moment of the pause */
-    private long pause_timestamp;
+	private SessionLogPlugin sessionlog;
 
-    /**
-     * Method that sets a timestamp marking the beggining of a pause.
-     * @param timestamp Timestamp marking the beggining of a pause
-     */
-    public void setPauseTimestamp(long timestamp) {
-        this.pause_timestamp = timestamp;
-    }
+	/** Option for pausing the timing. */
+	private final JCheckBoxMenuItem pausetiming;
 
-    /**
-     * Method that returns the object in the menu used by the user to set a pause.
-     * @return Returns the <code>JCheckBoxMenuItem</code> object that is used by
-     * the user to set a pause
-     */
-    public JCheckBoxMenuItem getPausetiming() {
-        return pausetiming;
-    }
-    
-    /**
-     * Mehtod that indicaties if the option for starting the logger is selected.
-     * @return Returns <code>true</code> if the logger option is selected and
-     * <code>false</code> otherwise.
-     */
-    public boolean isLoggerSelected(){
-        return enable_logging.isSelected();
-    }
-    
-    /**
-     * Constructor of the class, which adds the option to the menu.
-     * @param sessionlog Object that controls the coloring in the matcher.
-     */
-    public SessionLogMenu(SessionLogPlugin sessionlog) {
-        this.sessionlog=sessionlog;
-        this.pause_timestamp=0;
-        
-        this.pausetiming = new JCheckBoxMenuItem("Pause timing in SessionLog");
-        this.pausetiming.addActionListener(pausetimingMenuItemActionListener);
-        this.pausetiming.setSelected(false);
-        this.pausetiming.setEnabled(false);
-        
-        
-        this.enable_logging = new JCheckBoxMenuItem("Enable SessionLog");
-        this.enable_logging.addActionListener(enableloggerMenuItemActionListener);
-        this.enable_logging.setName("dump_log");
-        this.enable_logging.setSelected(true);
-        this.enable_logging.setEnabled(false);
-        
-        CoreEvents.registerApplicationEventListener(new IApplicationEventListener(){
-            @Override
-            public void onApplicationStartup() {
-                Core.getMainWindow().getMainMenu().getOptionsMenu().add(pausetiming);
-                Core.getMainWindow().getMainMenu().getOptionsMenu().add(enable_logging);
-            }
+	/** Option for activating/disactivating the logger. */
+	private final JCheckBoxMenuItem enable_logging;
 
-            @Override
-            public void onApplicationShutdown() {
-            }
-        });
-    }
+	/**
+	 * Method that enables/disables the logging option.
+	 * 
+	 * @param enabled
+	 *            Value to set to the "enabled" logging option
+	 */
+	public void SetEnabledLogging(boolean enabled) {
+		enable_logging.setEnabled(enabled);
+	}
 
-    /**
-     * Method applied when a pause is started. This method records the current
-     * timestamp and makes the different panels and text areas invisible.
-     */
-    public void pauseTimingSelected(){
-        pause_timestamp = System.nanoTime();
-        IntrospectionTools.getEditorTextArea().setVisible(false);
-        ((MatchesTextArea)Core.getMatcher()).setVisible(false);
-        Core.getGlossary().setVisible(false);
-        Core.getMachineTranslatePane().setVisible(false);
-    }
+	/**
+	 * Method that enables/disables the timing.
+	 * 
+	 * @param enabled
+	 *            Value to set to the "enabled" option
+	 */
+	public void SetEnabledPauseTiming(boolean enabled) {
+		pausetiming.setEnabled(enabled);
+	}
 
-    /**
-     * Method applied when the work is resumed after a pause. This method is
-     * used when a pause is resumed, and registers the pause event in the log,
-     * counting the time consumed in the pause, and makes the different panels
-     * and text areas visible again.
-     */
-    public void resumeTimingSelected(){
-        sessionlog.GetLog().SetPause(System.nanoTime()-pause_timestamp);
-        IntrospectionTools.getEditorTextArea().setVisible(true);
-        ((MatchesTextArea)Core.getMatcher()).setVisible(true);
-        Core.getGlossary().setVisible(true);
-        Core.getMachineTranslatePane().setVisible(true);
-    }
-    
-    /**
-     * Action listener that captures the action performed when the menu option
-     * for pausing/resuming is activated.
-     */
-    protected ActionListener pausetimingMenuItemActionListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if(pausetiming.isSelected())
-                pauseTimingSelected();
-            else
-                resumeTimingSelected();
-        }
-    };
-    
-    /**
-     * Action listener that captures the action performed when the menu option
-     * for starting/stopping the loger.
-     */
-    protected ActionListener enableloggerMenuItemActionListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if(enable_logging.isSelected()){
-                pausetiming.setEnabled(true);
-                sessionlog.InitLogging();
-            }
-            else{
-                pausetiming.setEnabled(false);
-                sessionlog.StopLogging();
-            }
-        }
-    };
+	/** Timestamp at the moment of the pause */
+	private long pause_timestamp;
+
+	/**
+	 * Method that sets a timestamp marking the beggining of a pause.
+	 * 
+	 * @param timestamp
+	 *            Timestamp marking the beggining of a pause
+	 */
+	public void setPauseTimestamp(long timestamp) {
+		this.pause_timestamp = timestamp;
+	}
+
+	/**
+	 * Method that returns the object in the menu used by the user to set a
+	 * pause.
+	 * 
+	 * @return Returns the <code>JCheckBoxMenuItem</code> object that is used by
+	 *         the user to set a pause
+	 */
+	public JCheckBoxMenuItem getPausetiming() {
+		return pausetiming;
+	}
+
+	/**
+	 * Mehtod that indicaties if the option for starting the logger is selected.
+	 * 
+	 * @return Returns <code>true</code> if the logger option is selected and
+	 *         <code>false</code> otherwise.
+	 */
+	public boolean isLoggerSelected() {
+		return enable_logging.isSelected();
+	}
+
+	/**
+	 * Constructor of the class, which adds the option to the menu.
+	 * 
+	 * @param sessionlog
+	 *            Object that controls the coloring in the matcher.
+	 */
+	public SessionLogMenu(SessionLogPlugin sessionlog) {
+		this.sessionlog = sessionlog;
+		this.pause_timestamp = 0;
+
+		this.pausetiming = new JCheckBoxMenuItem("Pause timing in SessionLog");
+		this.pausetiming.addActionListener(pausetimingMenuItemActionListener);
+		this.pausetiming.setSelected(false);
+		this.pausetiming.setEnabled(false);
+
+		this.enable_logging = new JCheckBoxMenuItem("Enable SessionLog");
+		this.enable_logging
+				.addActionListener(enableloggerMenuItemActionListener);
+		this.enable_logging.setName("dump_log");
+		this.enable_logging.setSelected(true);
+		this.enable_logging.setEnabled(false);
+
+		CoreEvents.registerApplicationEventListener(
+				new IApplicationEventListener() {
+					@Override
+					public void onApplicationStartup() {
+						Core.getMainWindow().getMainMenu().getOptionsMenu()
+								.add(pausetiming);
+						Core.getMainWindow().getMainMenu().getOptionsMenu()
+								.add(enable_logging);
+					}
+
+					@Override
+					public void onApplicationShutdown() {
+					}
+				});
+	}
+
+	/**
+	 * Method applied when a pause is started. This method records the current
+	 * timestamp and makes the different panels and text areas invisible.
+	 */
+	public void pauseTimingSelected() {
+		pause_timestamp = System.nanoTime();
+		IntrospectionTools.getEditorTextArea().setVisible(false);
+		((MatchesTextArea) Core.getMatcher()).setVisible(false);
+		Core.getGlossary().setVisible(false);
+		Core.getMachineTranslatePane().setVisible(false);
+	}
+
+	/**
+	 * Method applied when the work is resumed after a pause. This method is
+	 * used when a pause is resumed, and registers the pause event in the log,
+	 * counting the time consumed in the pause, and makes the different panels
+	 * and text areas visible again.
+	 */
+	public void resumeTimingSelected() {
+		sessionlog.GetLog().SetPause(System.nanoTime() - pause_timestamp);
+		IntrospectionTools.getEditorTextArea().setVisible(true);
+		((MatchesTextArea) Core.getMatcher()).setVisible(true);
+		Core.getGlossary().setVisible(true);
+		Core.getMachineTranslatePane().setVisible(true);
+	}
+
+	/**
+	 * Action listener that captures the action performed when the menu option
+	 * for pausing/resuming is activated.
+	 */
+	protected ActionListener pausetimingMenuItemActionListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (pausetiming.isSelected())
+				pauseTimingSelected();
+			else
+				resumeTimingSelected();
+		}
+	};
+
+	/**
+	 * Action listener that captures the action performed when the menu option
+	 * for starting/stopping the loger.
+	 */
+	protected ActionListener enableloggerMenuItemActionListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (enable_logging.isSelected()) {
+				pausetiming.setEnabled(true);
+				sessionlog.InitLogging();
+			} else {
+				pausetiming.setEnabled(false);
+				sessionlog.StopLogging();
+			}
+		}
+	};
 }
