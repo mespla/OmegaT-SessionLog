@@ -43,168 +43,177 @@ import java.util.logging.Logger;
 import org.omegat.core.Core;
 import org.omegat.core.CoreEvents;
 import org.omegat.util.StaticUtils;
-import org.omegat.util.StringUtils;
+import org.omegat.util.StringUtil;
 
 /**
  * SessionLog plugin main class. This class centralises the session logging.
- * Here, the logger is created containing all the information collected, and
- * the edition timing of each entry is measured.
+ * Here, the logger is created containing all the information collected, and the
+ * edition timing of each entry is measured.
+ * 
  * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
  */
 public class SessionLogPlugin {
-   
-    /** Menu of the plugin. */
-    private SessionLogMenu menu;
-    
-    /** Logger of the plugin. */
-    private static BaseLogger xmllog;
-    
-    private String log_path;
-    
-    public static BaseLogger getLogger()
-    {
-    	return xmllog;
-    }
-    
-    /**
-     * Constructor of the plugin. This constructor registers the
-     * <code>ApplicationEventListenerSessionLog</code>
-     * listener (which registers most of the other listeners) and the handler
-     * created to capture all the messages from the logger.
-     */
-    public SessionLogPlugin() {
-        log_path=null;
-        menu=new SessionLogMenu(this);
-        xmllog=new XMLLogger(this);
-        CoreEvents.registerApplicationEventListener(
-                new ApplicationEventListenerSessionLog(this));
-        Logger.getLogger("global").addHandler(new LoggerHandler());
-    }
-    
-    /**
-     * Method that returns the menu object.
-     * @return Returns the menu object of the plugin
-     */
-    public SessionLogMenu GetMenu(){
-        return menu;
-    }
-    
-    /**
-     * Returns the current logger .
-     * @return XML logger
-     */
-    public BaseLogger GetLog(){
-        return xmllog;
-    }
-    
-    /**
-     * Method that initialises the logger. This method initialises the logger by
-     * opening the log file in the root of the project. This method is called
-     * when a new project is selected.
-     */
-    public void InitLogging(){
-        IntrospectionTools.replaceAutoComplete();
-        xmllog.Reset();
-        
-        //Flushing the data about the last entry edited
-        File dir=new File(Core.getProject().getProjectProperties(
-                ).getProjectRoot()+"/session_logs");
-        dir.mkdir();
-        
-        Date d=new Date();
-        SimpleDateFormat dt = new SimpleDateFormat("yyyyMMddHHmmssSS");
-        StringBuilder sb=new StringBuilder(dir.getAbsolutePath());
-        sb.append("/");
-        sb.append(dt.format(d));
-        sb.append("session.log");
-        File f=new File(sb.toString());
-        log_path=f.getAbsolutePath();
-        try{
-            xmllog.NewProject();
-            
-            /** 
-             * This method is called whenever a project is loaded. Whenever
-             * a new project is loaded, the document (getOmDocument) is changed.
-             * OmegaT signals this using 2 different events:
-             * 	· when a new project is loaded, InitLogging
-             *  · when a new file inside a project is loaded, SegmentChangedListener.onNewFile
-             * To minimize code duplication, onNewFile() will have the responsibility of 
-             * pointing the listeners to the correct OmDocument and to log the file creation. 
-             */
-            
-            //xmllog.NewFile(Core.getEditor().getCurrentFile());
-            SegmentChangedListener.me.onNewFile(Core.getEditor().getCurrentFile());
-        } catch(FileNotFoundException ex){
-            ex.printStackTrace(System.err);
-        }
-    }
-    
-    /**
-     * Method that stops the logger. This method stops the logger by writing the
-     * current log into a file.
-     */
-    public void StopLogging(){
-        if(log_path!=null){
-            try{
-                PrintWriter pw=new PrintWriter(log_path);
-                xmllog.DumpToWriter(pw);
-                log_path=null;
-            } catch (FileNotFoundException ex) {
-                ex.printStackTrace(System.err);
-            }
-        }
-    }
-    
-    /**
-     * This class implements a handler for the logger in order to capture the
-     * log messages into the session log.
-     */
-    private class LoggerHandler extends Handler{
-        /**
-         * This method captures the log messages from the logger in order to
-         * include them into the session log. This method takes
-         * a logger record and processes it to be included in the current
-         * session log.
-         * @param record Record from the logger to be processed
-         */
-        @Override
-        public void publish(LogRecord record) {
-            if(xmllog!=null){
-                String message;
-                String code=null;
-                String format;
-                ResourceBundle rb=java.util.ResourceBundle.getBundle(
-                        "org/omegat/Bundle", Locale.ENGLISH);
-                if(rb.containsKey(record.getMessage())){
-                    code=record.getMessage();
-                    format = rb.getString(record.getMessage());
-                }
-                else
-                    format = record.getMessage();
 
-                if (record.getParameters() == null || record.getParameters().length==0) {
-                    message = format;
-                } else {
-                    message = StringUtils.format(format, record.getParameters());
-                }
-                try{
-                    xmllog.LoggerEvent(code, record.getParameters()[0].toString(), message);
-                }catch (Exception ex){
-                    xmllog.LoggerEvent(code, null, message);
-                }
-            }
-        }
+	/** Menu of the plugin. */
+	private SessionLogMenu menu;
 
-        /**
-         * This mehtod is not used, since the logger is never flushed.
-         */
-        @Override
-        public void flush() {}
+	/** Logger of the plugin. */
+	private static BaseLogger xmllog;
 
-        /**
-         * This mehtod is not used, since the logger is never closed.
-         */
-        @Override
-        public void close() throws SecurityException {}
-    }
+	private String log_path;
+
+	public static BaseLogger getLogger() {
+		return xmllog;
+	}
+
+	/**
+	 * Constructor of the plugin. This constructor registers the
+	 * <code>ApplicationEventListenerSessionLog</code> listener (which registers
+	 * most of the other listeners) and the handler created to capture all the
+	 * messages from the logger.
+	 */
+	public SessionLogPlugin() {
+		log_path = null;
+		menu = new SessionLogMenu(this);
+		xmllog = new XMLLogger(this);
+		CoreEvents.registerApplicationEventListener(
+				new ApplicationEventListenerSessionLog(this));
+		Logger.getLogger("global").addHandler(new LoggerHandler());
+	}
+
+	/**
+	 * Method that returns the menu object.
+	 * 
+	 * @return Returns the menu object of the plugin
+	 */
+	public SessionLogMenu GetMenu() {
+		return menu;
+	}
+
+	/**
+	 * Returns the current logger .
+	 * 
+	 * @return XML logger
+	 */
+	public BaseLogger GetLog() {
+		return xmllog;
+	}
+
+	/**
+	 * Method that initialises the logger. This method initialises the logger by
+	 * opening the log file in the root of the project. This method is called
+	 * when a new project is selected.
+	 */
+	public void InitLogging() {
+		IntrospectionTools.replaceAutoComplete();
+		xmllog.Reset();
+
+		// Flushing the data about the last entry edited
+		File dir = new File(
+				Core.getProject().getProjectProperties().getProjectRoot()
+						+ "/session_logs");
+		dir.mkdir();
+
+		Date d = new Date();
+		SimpleDateFormat dt = new SimpleDateFormat("yyyyMMddHHmmssSS");
+		StringBuilder sb = new StringBuilder(dir.getAbsolutePath());
+		sb.append("/");
+		sb.append(dt.format(d));
+		sb.append("session.log");
+		File f = new File(sb.toString());
+		log_path = f.getAbsolutePath();
+		try {
+			xmllog.NewProject();
+
+			/**
+			 * This method is called whenever a project is loaded. Whenever a
+			 * new project is loaded, the document (getOmDocument) is changed.
+			 * OmegaT signals this using 2 different events: · when a new
+			 * project is loaded, InitLogging · when a new file inside a project
+			 * is loaded, SegmentChangedListener.onNewFile To minimize code
+			 * duplication, onNewFile() will have the responsibility of pointing
+			 * the listeners to the correct OmDocument and to log the file
+			 * creation.
+			 */
+
+			// xmllog.NewFile(Core.getEditor().getCurrentFile());
+			SegmentChangedListener.me
+					.onNewFile(Core.getEditor().getCurrentFile());
+		} catch (FileNotFoundException ex) {
+			ex.printStackTrace(System.err);
+		}
+	}
+
+	/**
+	 * Method that stops the logger. This method stops the logger by writing the
+	 * current log into a file.
+	 */
+	public void StopLogging() {
+		if (log_path != null) {
+			try {
+				PrintWriter pw = new PrintWriter(log_path);
+				xmllog.DumpToWriter(pw);
+				log_path = null;
+			} catch (FileNotFoundException ex) {
+				ex.printStackTrace(System.err);
+			}
+		}
+	}
+
+	/**
+	 * This class implements a handler for the logger in order to capture the
+	 * log messages into the session log.
+	 */
+	private class LoggerHandler extends Handler {
+		/**
+		 * This method captures the log messages from the logger in order to
+		 * include them into the session log. This method takes a logger record
+		 * and processes it to be included in the current session log.
+		 * 
+		 * @param record
+		 *            Record from the logger to be processed
+		 */
+		@Override
+		public void publish(LogRecord record) {
+			if (xmllog != null) {
+				String message;
+				String code = null;
+				String format;
+				ResourceBundle rb = java.util.ResourceBundle
+						.getBundle("org/omegat/Bundle", Locale.ENGLISH);
+				if (rb.containsKey(record.getMessage())) {
+					code = record.getMessage();
+					format = rb.getString(record.getMessage());
+				} else
+					format = record.getMessage();
+
+				if (record.getParameters() == null
+						|| record.getParameters().length == 0) {
+					message = format;
+				} else {
+					message = StringUtil.format(format, record.getParameters());
+				}
+				try {
+					xmllog.LoggerEvent(code,
+							record.getParameters()[0].toString(), message);
+				} catch (Exception ex) {
+					xmllog.LoggerEvent(code, null, message);
+				}
+			}
+		}
+
+		/**
+		 * This mehtod is not used, since the logger is never flushed.
+		 */
+		@Override
+		public void flush() {
+		}
+
+		/**
+		 * This mehtod is not used, since the logger is never closed.
+		 */
+		@Override
+		public void close() throws SecurityException {
+		}
+	}
 }

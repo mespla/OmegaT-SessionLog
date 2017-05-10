@@ -30,7 +30,6 @@ package org.omegat.plugins.sessionlog;
 
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DocumentFilter.FilterBypass;
 import org.omegat.core.Core;
 import org.omegat.core.matching.NearString.Scores;
 import org.omegat.gui.editor.Document3;
@@ -40,88 +39,94 @@ import org.omegat.gui.editor.DocumentFilter3;
  *
  * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
  */
-public class EditorTextAreaDocumentFilter extends DocumentFilter3{
-    
-    SessionLogPlugin sessionlog;
-    
-    public EditorTextAreaDocumentFilter(SessionLogPlugin sessionlog){
-        this.sessionlog=sessionlog;
-    }
+public class EditorTextAreaDocumentFilter extends DocumentFilter3 {
 
-    @Override
-    public void remove(FilterBypass fb, int offset, int length) throws
-                       BadLocationException {
-        Document3 doc=(Document3)fb.getDocument();
-        String text_to_remove="";
-        int trans_start=-1;
-        try{
-            text_to_remove=fb.getDocument().getText(offset, length);
-            trans_start=doc.getTranslationStart();
-        }catch(NullPointerException ex){
-        }catch(BadLocationException ex){}
-//        String old_text=Core.getEditor().getCurrentTranslation();
-        String old_text = IntrospectionTools.getCurrentTranslation();
-        super.remove(fb, offset, length);
-//        if(!Core.getEditor().getCurrentTranslation().equals(old_text))
-        if(old_text != null && !IntrospectionTools.getCurrentTranslation().equals(old_text))
-            sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove);
-    }
+	SessionLogPlugin sessionlog;
 
-    @Override
-    public void insertString(FilterBypass fb, int offset, String string,
-                             AttributeSet attr) throws BadLocationException {
-        Document3 doc=(Document3)fb.getDocument();
-        int trans_start=-1;
-        try{
-            trans_start=doc.getTranslationStart();
-        }catch(NullPointerException ex){}
-//        String old_text=Core.getEditor().getCurrentTranslation();
-        String old_text=IntrospectionTools.getCurrentTranslation();
-        super.insertString(fb, offset, string, attr);
-//        if(!Core.getEditor().getCurrentTranslation().equals(old_text))
-        if(old_text != null && !IntrospectionTools.getCurrentTranslation().equals(old_text))
-            sessionlog.GetLog().NewInsertion(offset-trans_start, string);
-    }
-    
-    @Override
-    public void replace(FilterBypass fb, int offset, int length, String text,
-                        AttributeSet attrs) throws BadLocationException {
-        Document3 doc=(Document3)fb.getDocument();
-        //The text which will be deleted is stored before performing the replacement
-        String text_to_remove=doc.getText(offset, length);
-        
-        int trans_start=doc.getTranslationStart();
+	public EditorTextAreaDocumentFilter(SessionLogPlugin sessionlog) {
+		this.sessionlog = sessionlog;
+	}
 
-//        int trans_end=trans_start+Core.getEditor().getCurrentTranslation().length();
-        int trans_end=trans_start+IntrospectionTools.getCurrentTranslation().length();
-        if(Core.getMatcher().getActiveMatch()!=null && 
-                Core.getMatcher().getActiveMatch().translation.equals(text)){
-            Scores scores=Core.getMatcher().getActiveMatch().scores[0];
-            
-            if(offset==trans_start && length==trans_end-trans_start){
-                sessionlog.GetLog().ReplaceFromTM(offset-trans_start,
-                        IntrospectionTools.getActiveMatchIndex(),
-                        text_to_remove, text, scores.score, scores.scoreNoStem,
-                        scores.adjustedScore);
-            }
-            else{
-                sessionlog.GetLog().InsertFromTM(offset-trans_start,
-                        IntrospectionTools.getActiveMatchIndex(), text,
-                        scores.score, scores.scoreNoStem, scores.adjustedScore);
-            }
-        }
-        else if(Core.getMachineTranslatePane().getDisplayedTranslation()!=null &&
-                Core.getMachineTranslatePane().getDisplayedTranslation().equals(
-                text)){
-            sessionlog.GetLog().ReplaceFromMT(offset-trans_start,
-                    text_to_remove, text);
-        }
-        else{
-            if(length>0)
-                sessionlog.GetLog().NewDeletion(offset-trans_start, text_to_remove);
-            sessionlog.GetLog().NewInsertion(offset-trans_start, text);
-        }
-        
-        super.replace(fb, offset, length, text, attrs);
-    }
+	@Override
+	public void remove(FilterBypass fb, int offset, int length)
+			throws BadLocationException {
+		Document3 doc = (Document3) fb.getDocument();
+		String text_to_remove = "";
+		int trans_start = -1;
+		try {
+			text_to_remove = fb.getDocument().getText(offset, length);
+			trans_start = doc.getTranslationStart();
+		} catch (NullPointerException ex) {
+		} catch (BadLocationException ex) {
+		}
+
+		String old_text = IntrospectionTools.getCurrentTranslation();
+		super.remove(fb, offset, length);
+		if (old_text != null && !old_text
+				.equals(IntrospectionTools.getCurrentTranslation())) {
+			sessionlog.GetLog().NewDeletion(offset - trans_start,
+					text_to_remove);
+		}
+
+	}
+
+	@Override
+	public void insertString(FilterBypass fb, int offset, String string,
+			AttributeSet attr) throws BadLocationException {
+		Document3 doc = (Document3) fb.getDocument();
+		int trans_start = -1;
+		try {
+			trans_start = doc.getTranslationStart();
+		} catch (NullPointerException ex) {
+		}
+		String old_text = IntrospectionTools.getCurrentTranslation();
+		super.insertString(fb, offset, string, attr);
+		if (old_text != null && !old_text
+				.equals(IntrospectionTools.getCurrentTranslation())) {
+			sessionlog.GetLog().NewInsertion(offset - trans_start, string);
+		}
+	}
+
+	@Override
+	public void replace(FilterBypass fb, int offset, int length, String text,
+			AttributeSet attrs) throws BadLocationException {
+		Document3 doc = (Document3) fb.getDocument();
+		// The text which will be deleted is stored before performing the
+		// replacement
+		String text_to_remove = doc.getText(offset, length);
+
+		int trans_start = doc.getTranslationStart();
+
+		int trans_end = trans_start
+				+ IntrospectionTools.getCurrentTranslation().length();
+		if (Core.getMatcher().getActiveMatch() != null
+				&& Core.getMatcher().getActiveMatch().translation
+						.equals(text)) {
+			Scores scores = Core.getMatcher().getActiveMatch().scores[0];
+
+			if (offset == trans_start && length == trans_end - trans_start) {
+				sessionlog.GetLog().ReplaceFromTM(offset - trans_start,
+						IntrospectionTools.getActiveMatchIndex(),
+						text_to_remove, text, scores.score, scores.scoreNoStem,
+						scores.adjustedScore);
+			} else {
+				sessionlog.GetLog().InsertFromTM(offset - trans_start,
+						IntrospectionTools.getActiveMatchIndex(), text,
+						scores.score, scores.scoreNoStem, scores.adjustedScore);
+			}
+		} else if (Core.getMachineTranslatePane()
+				.getDisplayedTranslation() != null
+				&& Core.getMachineTranslatePane().getDisplayedTranslation()
+						.equals(text)) {
+			sessionlog.GetLog().ReplaceFromMT(offset - trans_start,
+					text_to_remove, text);
+		} else {
+			if (length > 0)
+				sessionlog.GetLog().NewDeletion(offset - trans_start,
+						text_to_remove);
+			sessionlog.GetLog().NewInsertion(offset - trans_start, text);
+		}
+
+		super.replace(fb, offset, length, text, attrs);
+	}
 }
