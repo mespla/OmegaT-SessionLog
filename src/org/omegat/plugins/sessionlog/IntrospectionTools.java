@@ -34,6 +34,7 @@ import java.util.List;
 
 import org.omegat.core.Core;
 import org.omegat.core.machinetranslators.BaseTranslate;
+import org.omegat.core.machinetranslators.MachineTranslators;
 import org.omegat.core.matching.NearString;
 import org.omegat.gui.editor.Document3;
 import org.omegat.gui.editor.EditorController;
@@ -222,28 +223,20 @@ public class IntrospectionTools {
 
 	public static int getMTEntriesSize() {
 		try {
-			Field translatorsField = MachineTranslateTextArea.class
-					.getDeclaredField("translators");
-			translatorsField.setAccessible(true);
-			try {
-				IMachineTranslation[] translators = (IMachineTranslation[]) translatorsField
-						.get(Core.getMachineTranslatePane());
-				int counter = 0;
-				Field enabledField = BaseTranslate.class
-						.getDeclaredField("enabled");
-				enabledField.setAccessible(true);
-				for (IMachineTranslation mt : translators) {
-					boolean enabled = (Boolean) enabledField
-							.get((BaseTranslate) mt);
-					if (enabled)
-						counter++;
-				}
-				return counter;
-			} catch (IllegalAccessException iae) {
-				iae.printStackTrace(System.err);
-				System.exit(-1);
+			
+			List<IMachineTranslation> translators = MachineTranslators.getMachineTranslators();
+			int counter = 0;
+			Field enabledField = BaseTranslate.class
+					.getDeclaredField("enabled");
+			enabledField.setAccessible(true);
+			for (IMachineTranslation mt : translators) {
+				boolean enabled = (Boolean) enabledField
+						.get((BaseTranslate) mt);
+				if (enabled)
+					counter++;
 			}
-		} catch (NoSuchFieldException nsfe) {
+			return counter;
+		} catch (NoSuchFieldException | IllegalAccessException nsfe) {
 			nsfe.printStackTrace(System.err);
 			System.exit(-1);
 		}

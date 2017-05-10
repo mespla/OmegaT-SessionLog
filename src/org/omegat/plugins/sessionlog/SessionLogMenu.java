@@ -34,6 +34,7 @@ import javax.swing.JCheckBoxMenuItem;
 import org.omegat.core.Core;
 import org.omegat.core.CoreEvents;
 import org.omegat.core.events.IApplicationEventListener;
+import org.omegat.gui.glossary.GlossaryTextArea;
 import org.omegat.gui.matches.MatchesTextArea;
 
 /**
@@ -154,7 +155,7 @@ public class SessionLogMenu {
 		pause_timestamp = System.nanoTime();
 		IntrospectionTools.getEditorTextArea().setVisible(false);
 		((MatchesTextArea) Core.getMatcher()).setVisible(false);
-		Core.getGlossary().setVisible(false);
+		((GlossaryTextArea)Core.getGlossary()).setVisible(false);
 		Core.getMachineTranslatePane().setVisible(false);
 	}
 
@@ -168,7 +169,7 @@ public class SessionLogMenu {
 		sessionlog.GetLog().SetPause(System.nanoTime() - pause_timestamp);
 		IntrospectionTools.getEditorTextArea().setVisible(true);
 		((MatchesTextArea) Core.getMatcher()).setVisible(true);
-		Core.getGlossary().setVisible(true);
+		((GlossaryTextArea)Core.getGlossary()).setVisible(true);
 		Core.getMachineTranslatePane().setVisible(true);
 	}
 

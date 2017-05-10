@@ -132,8 +132,8 @@ public class ApplicationEventListenerSessionLog
 					System.exit(-1);
 				}
 
-				Core.getGlossary().addMouseListener(
-						new PopupListener(Core.getGlossary()));
+				((GlossaryTextArea)Core.getGlossary()).addMouseListener(
+						new PopupListener((GlossaryTextArea)Core.getGlossary()));
 
 				MatchesTextArea matcher = (MatchesTextArea) Core.getMatcher();
 				matcher.getDocument()
@@ -184,7 +184,7 @@ public class ApplicationEventListenerSessionLog
 							}
 						});
 
-				Core.getGlossary().getDocument()
+				((GlossaryTextArea)Core.getGlossary()).getDocument()
 						.addDocumentListener(new DocumentListener() {
 							// When a change is registered, if the active match
 							// changed,

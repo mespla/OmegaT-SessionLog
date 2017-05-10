@@ -30,12 +30,12 @@ import org.omegat.gui.editor.mark.IMarker;
 import org.omegat.gui.main.IMainMenu;
 import org.omegat.gui.main.IMainWindow;
 import org.omegat.gui.exttrans.MachineTranslateTextArea;
-import org.omegat.gui.glossary.GlossaryTextArea;
+import org.omegat.gui.glossary.IGlossaries;
 
 public class Core {
     public static IProject getProject() {return null;}
     
-    public static GlossaryTextArea getGlossary() {return null;}
+    public static IGlossaries getGlossary() {return null;}
 
     public static IMainWindow getMainWindow() {
         return new IMainWindow() {
