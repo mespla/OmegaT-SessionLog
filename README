@@ -4,7 +4,9 @@ INTRODUCTION
 The SessionLog plugin was created by Miquel Esplà-Gomis
 (mespla@dlsi.ua.es), Mikel L. Forcada, and Felipe
 Sánchez-Martínez at University of Alacant (www.ua.es).
-and is licensed under GPLv3. This is a third-party plugin
+and is licensed under GPLv3 while the library htmlparser
+included in this package is released under LGPLv3 license.
+This is a third-party plugin
 for OmegaT (http://www.omegat.org) translation memory tool,
 compatible with version 3.0 and higher, and is aimed at
 capturing the actions performed by a user when translating
