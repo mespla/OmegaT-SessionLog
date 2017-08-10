@@ -35,7 +35,7 @@ import org.omegat.core.data.SourceTextEntry;
 
 /**
  *
- * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
+ * @author Miquel EsplÃ  Gomis [mespla@dlsi.ua.es]
  */
 public interface BaseLogger {
     
@@ -127,7 +127,14 @@ public interface BaseLogger {
 
     public abstract void ReplaceFromMT(int offset, String removedtext,
             String newtext);
-
+    
+    public abstract void ReplaceFromFMR(int offset, int tu_pos,
+            String removedtext, String insertedtext, int fms_stemming_onlywords,
+            int fms_onlywords, int fms, int fmr_pos);
+    
+    public void InsertFromFMR(int offset, int tu_pos, String text,
+            int fms_stemming_onlywords, int fms_onlywords, int fms, int fmr_pos);
+    
     public abstract void InsertFromGlossary(int offset, String newtext);
 
     public abstract void CaretUpdate(int init_selection, int end_selection);

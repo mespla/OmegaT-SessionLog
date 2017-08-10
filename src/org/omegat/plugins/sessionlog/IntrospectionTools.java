@@ -179,24 +179,23 @@ public class IntrospectionTools {
 	}
 
 	public static List<NearString> getMatches() {
-		List<NearString> matches = null;
-		try {
-			Field matchesField = MatchesTextArea.class
-					.getDeclaredField("matches");
-			matchesField.setAccessible(true);
-			try {
-				matches = (List<NearString>) matchesField
-						.get((MatchesTextArea) Core.getMatcher());
-			} catch (IllegalAccessException iae) {
-				iae.printStackTrace(System.err);
-				System.exit(-1);
-			}
-		} catch (NoSuchFieldException nsfe) {
-			nsfe.printStackTrace(System.err);
-			System.exit(-1);
-		}
+            List<NearString> matches = null;
+            try {
+                Field matchesField = MatchesTextArea.class.getDeclaredField("matches");
+                matchesField.setAccessible(true);
+                try {
+                        matches = (List<NearString>) matchesField
+                                        .get((MatchesTextArea) Core.getMatcher());
+                } catch (IllegalAccessException iae) {
+                        iae.printStackTrace(System.err);
+                        System.exit(-1);
+                }
+            } catch (NoSuchFieldException nsfe) {
+                nsfe.printStackTrace(System.err);
+                System.exit(-1);
+            }
 
-		return matches;
+            return matches;
 	}
 
 	public static List<GlossaryEntry> getGlossaryEntries() {
@@ -268,4 +267,47 @@ public class IntrospectionTools {
 		}
 
 	}
+        
+        
+        /**
+         * Method that returns the current fuzzy-match-repaired suggestion. Method
+         * that checks if the fuzzy match repair plugin is enabled and, if so,
+         * returns the suggestion provided for the current entry.
+         * @return 
+         */
+        public static int getFuzzyMatchRepairActiveEntry() {
+            int exit=-1;
+            try {
+                Class<?> clazz = Class.forName(
+                        "org.omegat.plugins.fuzzymatchrepair.FuzzyMatchRepairTextArea");
+
+                    Field n = clazz.getField("activeEntry");
+                    Object result = n.get(null);
+                    if(result!=null)
+                        exit=(Integer)result;
+            } catch (Exception e) {
+            }
+            return exit;
+        }
+        
+        /**
+         * Method that returns the current fuzzy-match-repaired suggestion. Method
+         * that checks if the fuzzy match repair plugin is enabled and, if so,
+         * returns the suggestion provided for the current entry.
+         * @return 
+         */
+        public static String getFuzzyMatchRepairTranslation() {
+            String exit=null;
+            try {
+                Class<?> clazz = Class.forName(
+                        "org.omegat.plugins.fuzzymatchrepair.FuzzyMatchRepairTextArea");
+
+                    Method method = clazz.getMethod("getCurrentEntry");
+                    Object result=method.invoke(null);
+                    if(result!=null)
+                        exit=(String)result;
+            } catch (Exception e) {
+            }
+            return exit;
+        }
 }

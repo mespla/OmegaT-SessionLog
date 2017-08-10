@@ -57,7 +57,7 @@ import org.w3c.dom.Element;
 
 /**
  *
- * @author Miquel Esplà Gomis [mespla@dlsi.ua.es]
+ * @author Miquel EsplÃ  Gomis [mespla@dlsi.ua.es]
  */
 public class XMLLogger implements BaseLogger{
     private Document log_document;
@@ -74,7 +74,7 @@ public class XMLLogger implements BaseLogger{
     
     private int edition_idx;
     
-    private UndoManager undomanager;
+    private BaseLogger.UndoManager undomanager;
     
     private long chosen_entry_time;
     
@@ -295,7 +295,7 @@ public class XMLLogger implements BaseLogger{
         edition_idx=0;
         chosen_entry_time = -1;
         edition_idx=0;
-        undomanager=new UndoManager();
+        undomanager=new BaseLogger.UndoManager();
 
         //Starting the root node
         Element rootElement = log_document.createElement("project");
@@ -341,13 +341,16 @@ public class XMLLogger implements BaseLogger{
             current_entry_node.setAttribute("duration", df.format(
                     time_consumed_entry/1000000000.0));
             Element element = NewElement("glossaryRecommendations", false);
-            element.setAttribute("number", Integer.toString(this.current_TM_entries));
+            current_glossary_entries=IntrospectionTools.getGlossaryEntries().size();
+            element.setAttribute("number", Integer.toString(this.current_glossary_entries));
             current_entry_node.appendChild(element);
             element = NewElement("MTRecommendations", false);
+            current_MT_entries=IntrospectionTools.getMTEntriesSize();
             element.setAttribute("number", Integer.toString(this.current_MT_entries));
             current_entry_node.appendChild(element);
             element = NewElement("TMRecommendations", false);
-            element.setAttribute("number", Integer.toString(this.current_glossary_entries));
+            current_TM_entries=IntrospectionTools.getMatches().size();
+            element.setAttribute("number", Integer.toString(this.current_TM_entries));
             current_entry_node.appendChild(element);
             if(last_edited_text!=null){
                 Element target_element = NewElement("finalTarget", false);
@@ -463,6 +466,22 @@ public class XMLLogger implements BaseLogger{
     }
 
     @Override
+    public void InsertFromFMR(int offset, int tu_pos, String text,
+            int fms_stemming_onlywords, int fms_onlywords, int fms, int fmr_pos){
+        if(current_editions_node!=null){
+            Element element = NewElement("insert", true);
+            element.setAttribute("from", "FMR");
+            element.setAttribute("fms_stemming_onlywords", Integer.toString(
+                    fms_stemming_onlywords));
+            element.setAttribute("fms_onlywords", Integer.toString(fms_onlywords));
+            element.setAttribute("fms", Integer.toString(fms));
+            element.setAttribute("tu_proposal_number", Integer.toString(tu_pos+1));
+            element.setAttribute("fmr_proposal_number", Integer.toString(fmr_pos+1));
+            NewEdition(offset, text, element);
+        }
+    }
+    
+    @Override
     public void InsertFromTM(int offset, int tu_pos, String text,
             int fms_stemming_onlywords, int fms_onlywords, int fms){
         if(current_editions_node!=null){
@@ -482,8 +501,12 @@ public class XMLLogger implements BaseLogger{
             String insertedtext, int fms_stemming_onlywords, int fms_onlywords,
             int fms){
         if(current_editions_node!=null){
-            this.current_editions_node.removeChild(
-                    this.current_editions_node.getLastChild());
+            try{
+                this.current_editions_node.removeChild(
+                        this.current_editions_node.getLastChild());
+            }
+            catch(Exception ex){
+            }
             Element element = NewElement("delete", true);
             element.setAttribute("from", "TM");
             element.setAttribute("proposal_number", Integer.toString(tu_pos+1));
@@ -506,10 +529,35 @@ public class XMLLogger implements BaseLogger{
     }
 
     @Override
+    public void ReplaceFromFMR(int offset, int tu_pos, String removedtext,
+            String insertedtext, int fms_stemming_onlywords, int fms_onlywords,
+            int fms, int fmr_pos){
+        if(current_editions_node!=null){
+            try{
+                this.current_editions_node.removeChild(
+                        this.current_editions_node.getLastChild());
+            }
+            catch(Exception ex){
+            }
+            Element element = NewElement("delete", true);
+            element.setAttribute("from", "FMR");
+            element.setAttribute("tu_proposal_number", Integer.toString(tu_pos+1));
+            element.setAttribute("fmr_proposal_number", Integer.toString(fmr_pos+1));
+            NewEdition(offset, removedtext, element);
+            InsertFromFMR(offset, tu_pos, insertedtext, fms_stemming_onlywords,
+                    fms_onlywords, fms, fmr_pos);
+        }
+    }
+
+    @Override
     public void InsertFromGlossary(int offset, String newtext){
         if(current_editions_node!=null){
             Element element = (Element)current_editions_node.getLastChild();
-            current_editions_node.removeChild(current_editions_node.getLastChild());
+            try{
+                current_editions_node.removeChild(current_editions_node.getLastChild());
+            }
+            catch(Exception ex){
+            }
             element.setAttribute("from", "GLOSSARY");
 
             //If it was a replacement

@@ -28,16 +28,22 @@
 
 package org.omegat.plugins.sessionlog;
 
+import static java.nio.file.StandardCopyOption.*;
 import org.omegat.plugins.sessionlog.loggers.BaseLogger;
 import org.omegat.plugins.sessionlog.loggers.XMLLogger;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import org.omegat.core.Core;
@@ -144,6 +150,27 @@ public class SessionLogPlugin {
 		}
 	}
 
+        /**
+	 * Method that stops the logger. This method stops the logger by writing the
+	 * current log into a file.
+	 */
+	public void BackupLogging() {
+		if (log_path != null) {
+                    try {
+                        Path spath = FileSystems.getDefault().getPath(log_path);
+                        Path tpath = FileSystems.getDefault().getPath(log_path+".tmp");
+                        Files.move(spath, tpath, REPLACE_EXISTING);
+                    } catch (FileNotFoundException ex) {}
+                    catch (IOException ex) {}
+                    try{
+                        PrintWriter pw = new PrintWriter(log_path);
+                        xmllog.DumpToWriter(pw);
+                    } catch (FileNotFoundException ex) {
+                        System.err.print("It was not possible to write the log file "+log_path);
+                    }
+		}
+	}
+        
 	/**
 	 * Method that stops the logger. This method stops the logger by writing the
 	 * current log into a file.

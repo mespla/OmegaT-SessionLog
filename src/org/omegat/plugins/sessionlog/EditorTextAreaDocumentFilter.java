@@ -28,6 +28,7 @@
 
 package org.omegat.plugins.sessionlog;
 
+import java.lang.reflect.Method;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import org.omegat.core.Core;
@@ -99,6 +100,10 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter3 {
 
 		int trans_end = trans_start
 				+ IntrospectionTools.getCurrentTranslation().length();
+                
+                //Variable that contains the fuzzy-match repair suggesiton if
+                //the plugin is enabled
+                String fmrsuggestion = IntrospectionTools.getFuzzyMatchRepairTranslation();
 		if (Core.getMatcher().getActiveMatch() != null
 				&& Core.getMatcher().getActiveMatch().translation
 						.equals(text)) {
@@ -120,6 +125,21 @@ public class EditorTextAreaDocumentFilter extends DocumentFilter3 {
 						.equals(text)) {
 			sessionlog.GetLog().ReplaceFromMT(offset - trans_start,
 					text_to_remove, text);
+                } else if (fmrsuggestion!=null && fmrsuggestion.equals(text)) {
+			Scores scores = Core.getMatcher().getActiveMatch().scores[0];
+
+			if (offset == trans_start && length == trans_end - trans_start) {
+				sessionlog.GetLog().ReplaceFromFMR(offset - trans_start,
+                                        IntrospectionTools.getActiveMatchIndex(),
+                                        text_to_remove, text, scores.score,
+                                        scores.scoreNoStem, scores.adjustedScore,
+                                        IntrospectionTools.getFuzzyMatchRepairActiveEntry());
+			} else {
+				sessionlog.GetLog().InsertFromFMR(offset - trans_start,
+                                        IntrospectionTools.getActiveMatchIndex(), text,
+                                        scores.score, scores.scoreNoStem, scores.adjustedScore,
+                                        IntrospectionTools.getFuzzyMatchRepairActiveEntry());
+			}
 		} else {
 			if (length > 0)
 				sessionlog.GetLog().NewDeletion(offset - trans_start,

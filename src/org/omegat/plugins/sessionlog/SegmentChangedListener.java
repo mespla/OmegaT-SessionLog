@@ -147,10 +147,11 @@ public class SegmentChangedListener implements IEntryEventListener {
 			 * this behaviour).
 			 */
 			if (!isInjected) {
-				injectListeners();
+                            injectListeners();
 			}
 
 			sessionlog.GetLog().CloseEntry();
+                        sessionlog.BackupLogging();
 			sessionlog.GetLog().NewEntry(newEntry);
 		}
 	}
