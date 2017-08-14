@@ -16,6 +16,8 @@ import org.omegat.util.StaticUtils;
 public class InstrumentedAutoComplete extends AutoCompleter {
 
 	final String AUTOCOMPLETE_ACTION = "autocompleteAction";
+	// Do not log show/hide/update if this is true.
+	public static boolean reducedLog = false;
 
 	public static EditorTextArea3 getEditor(AutoCompleter c) {
 		Field f;
@@ -25,7 +27,8 @@ public class InstrumentedAutoComplete extends AutoCompleter {
 			f.setAccessible(true);
 			editor = (EditorTextArea3) f.get(c);
 		} catch (NoSuchFieldException | IllegalAccessException ex) {
-			System.out.println("SessionLog error: getting the editor " + ex.getMessage());
+			System.out.println(
+					"SessionLog error: getting the editor " + ex.getMessage());
 		}
 		return editor;
 	}
@@ -41,7 +44,8 @@ public class InstrumentedAutoComplete extends AutoCompleter {
 			// f2 = InstrumentedAutoComplete.class.getDeclaredField("views");
 			f.set(this, views);
 		} catch (NoSuchFieldException | IllegalAccessException ex) {
-			System.out.println("SessionLog error: getting the editor list " + ex.getMessage());
+			System.out.println("SessionLog error: getting the editor list "
+					+ ex.getMessage());
 		}
 	}
 
@@ -66,7 +70,7 @@ public class InstrumentedAutoComplete extends AutoCompleter {
 		if (StaticUtils.isKey(e, KeyEvent.VK_TAB, 0)) {
 			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
 					"VK_TAB", "", "");
-		}		
+		}
 		if (StaticUtils.isKey(e, KeyEvent.VK_PAGE_UP, 0)) {
 			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
 					"VK_PAGE_UP", "", "");
@@ -75,14 +79,14 @@ public class InstrumentedAutoComplete extends AutoCompleter {
 			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
 					"VK_PAGE_DOWN", "", "");
 		}
-		if (StaticUtils.isKey(e, KeyEvent.VK_HOME, Toolkit.getDefaultToolkit()
-				.getMenuShortcutKeyMask())
+		if (StaticUtils.isKey(e, KeyEvent.VK_HOME,
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())
 				|| StaticUtils.isKey(e, KeyEvent.VK_HOME, 0)) {
 			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
 					"VK_HOME", "", "");
 		}
-		if (StaticUtils.isKey(e, KeyEvent.VK_END, Toolkit.getDefaultToolkit()
-				.getMenuShortcutKeyMask())
+		if (StaticUtils.isKey(e, KeyEvent.VK_END,
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())
 				|| StaticUtils.isKey(e, KeyEvent.VK_END, 0)) {
 			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
 					"VK_END", "", "");
@@ -99,14 +103,14 @@ public class InstrumentedAutoComplete extends AutoCompleter {
 			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
 					"VK_ESCAPE", "", "");
 		}
-		if (StaticUtils.isKey(e, KeyEvent.VK_RIGHT, Toolkit.getDefaultToolkit()
-				.getMenuShortcutKeyMask())) {
+		if (StaticUtils.isKey(e, KeyEvent.VK_RIGHT,
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())) {
 			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
 					"VK_RIGHT", "", "");
 		}
 
-		if (StaticUtils.isKey(e, KeyEvent.VK_LEFT, Toolkit.getDefaultToolkit()
-				.getMenuShortcutKeyMask())) {
+		if (StaticUtils.isKey(e, KeyEvent.VK_LEFT,
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())) {
 			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
 					"VK_LEFT", "", "");
 		}
@@ -126,27 +130,27 @@ public class InstrumentedAutoComplete extends AutoCompleter {
 		} catch (Exception ex) {
 			System.out.println("SessionLog error: logging selection");
 		}
-		
-		if (item != null)
-		{
+
+		if (item != null) {
 			if (item.extras != null) {
 				for (String s : item.extras) {
 					extras.append(s);
 					extras.append(",");
 				}
 			}
-	
+
 			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
-					"DO_SELECTION", extras.toString(),
-					item.payload);
+					"DO_SELECTION", extras.toString(), item.payload);
 		}
 		super.doSelection();
 	}
 
 	@Override
 	public void updatePopup() {
-		SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
-				"UPDATE", "", "");
+		if (!reducedLog) {
+			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
+					"UPDATE", "", "");
+		}
 		try {
 			super.updatePopup();
 		} catch (Exception ex) {
@@ -156,19 +160,23 @@ public class InstrumentedAutoComplete extends AutoCompleter {
 
 	@Override
 	public void setVisible(boolean isVisible) {
-		if (isVisible)
-			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
-					"SHOW", "", "");
-		else
-			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
-					"HIDE", "", "");
+		if (!reducedLog) {
+			if (isVisible)
+				SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
+						"SHOW", "", "");
+			else
+				SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
+						"HIDE", "", "");
+		}
 		super.setVisible(isVisible);
 	}
 
 	@Override
 	public void textDidChange() {
-		SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
-				"TEXTCHANGE", "", "");
+		if (!reducedLog) {
+			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
+					"TEXTCHANGE", "", "");
+		}
 		super.textDidChange();
 	}
 }
