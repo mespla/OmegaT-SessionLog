@@ -67,6 +67,7 @@ public class ProjectChangesListener implements IProjectEventListener {
 				sessionlog.StopLogging();
 				sessionlog.GetMenu().SetEnabledPauseTiming(false);
 			}
+                        sessionlog.GetMenu().SetEnabledLogging(false);
 		} else if (eventType == PROJECT_CHANGE_TYPE.LOAD
 				|| eventType == PROJECT_CHANGE_TYPE.CREATE) {
 			if (sessionlog.GetMenu().isLoggerSelected()) {
