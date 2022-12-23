@@ -146,13 +146,13 @@ public class InstrumentedAutoComplete extends AutoCompleter {
 	}
 
 	@Override
-	public void updatePopup() {
+	public void updatePopup(boolean onlyIfVisible) {
 		if (!reducedLog) {
 			SessionLogPlugin.getLogger().GenericEvent(AUTOCOMPLETE_ACTION,
 					"UPDATE", "", "");
 		}
 		try {
-			super.updatePopup();
+			super.updatePopup(onlyIfVisible);
 		} catch (Exception ex) {
 			// ex.printStackTrace();
 		}
