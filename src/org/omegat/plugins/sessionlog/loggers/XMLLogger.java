@@ -39,6 +39,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -52,6 +53,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.omegat.core.Core;
 import org.omegat.core.data.SourceTextEntry;
+import org.omegat.gui.glossary.GlossaryEntry;
+import org.omegat.gui.glossary.GlossaryTextArea;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -149,7 +152,10 @@ public class XMLLogger implements BaseLogger{
     public void setEmtpyGlossaryProposals(boolean emtpy_glossary_proposals) {
         if(current_entry_node!=null && this.emtpy_glossary_proposals==true &&
                 emtpy_glossary_proposals==false){
-            current_glossary_entries=IntrospectionTools.getGlossaryEntries().size();
+            
+            GlossaryTextArea textarea = (GlossaryTextArea)Core.getGlossary();
+            List<GlossaryEntry> nowEntries = textarea.getDisplayedEntries();
+            current_glossary_entries=nowEntries.size();
             /*Element element = NewElement("glossaryRecommendations", false);
             element.setAttribute("number", Integer.toString(
                     IntrospectionTools.getGlossaryEntries().size()));
@@ -341,7 +347,10 @@ public class XMLLogger implements BaseLogger{
             current_entry_node.setAttribute("duration", df.format(
                     time_consumed_entry/1000000000.0));
             Element element = NewElement("glossaryRecommendations", false);
-            current_glossary_entries=IntrospectionTools.getGlossaryEntries().size();
+            
+            GlossaryTextArea textarea = (GlossaryTextArea)Core.getGlossary();
+            List<GlossaryEntry> nowEntries = textarea.getDisplayedEntries();
+            current_glossary_entries=nowEntries.size();
             element.setAttribute("number", Integer.toString(this.current_glossary_entries));
             current_entry_node.appendChild(element);
             element = NewElement("MTRecommendations", false);
