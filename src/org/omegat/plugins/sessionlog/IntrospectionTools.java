@@ -41,7 +41,7 @@ import org.omegat.gui.editor.EditorTextArea3;
 import org.omegat.gui.editor.TranslationUndoManager;
 import org.omegat.gui.editor.autocompleter.AutoCompleter;
 import org.omegat.gui.exttrans.IMachineTranslation;
-import org.omegat.gui.exttrans.MachineTranslateTextArea;
+import org.omegat.core.machinetranslators.MachineTranslators;
 import org.omegat.gui.glossary.GlossaryEntry;
 import org.omegat.gui.glossary.GlossaryTextArea;
 import org.omegat.gui.matches.MatchesTextArea;
@@ -91,7 +91,12 @@ public class IntrospectionTools {
 
 		return editor_text_area;
 	}
+        
 
+        public static GlossaryTextArea getGlossaryTextArea(){
+            return (GlossaryTextArea)Core.getGlossary();
+        }
+        
 	/**
 	 * Method that returns the EditorTextArea3 object from <code>Core</code>.
 	 * This method uses introspection to acces the private EditorTextArea3
@@ -178,6 +183,7 @@ public class IntrospectionTools {
 		return false;
 	}
 
+        @SuppressWarnings("unchecked")
 	public static List<NearString> getMatches() {
             List<NearString> matches = null;
             try {
@@ -197,36 +203,11 @@ public class IntrospectionTools {
 
             return matches;
 	}
-
-	public static List<GlossaryEntry> getGlossaryEntries() {
-		List<GlossaryEntry> nowEntries = null;
-		try {
-			Field nowEntriesField = GlossaryTextArea.class
-					.getDeclaredField("nowEntries");
-			nowEntriesField.setAccessible(true);
-			try {
-				nowEntries = (List<GlossaryEntry>) nowEntriesField
-						.get(Core.getGlossary());
-			} catch (IllegalAccessException iae) {
-				iae.printStackTrace(System.err);
-				System.exit(-1);
-			}
-		} catch (NoSuchFieldException nsfe) {
-			nsfe.printStackTrace(System.err);
-			System.exit(-1);
-		}
-
-		return nowEntries;
-	}
-
+        
 	public static int getMTEntriesSize() {
 		try {
-			Field translatorsField = MachineTranslateTextArea.class
-					.getDeclaredField("translators");
-			translatorsField.setAccessible(true);
 			try {
-				IMachineTranslation[] translators = (IMachineTranslation[]) translatorsField
-						.get(Core.getMachineTranslatePane());
+                                List<IMachineTranslation> translators = MachineTranslators.getMachineTranslators();
 				int counter = 0;
 				Field enabledField = BaseTranslate.class
 						.getDeclaredField("enabled");
