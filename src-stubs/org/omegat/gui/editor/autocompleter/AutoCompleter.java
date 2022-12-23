@@ -24,7 +24,7 @@ public class AutoCompleter {
 		
 	}
 
-	public void updatePopup() {
+	public void updatePopup(boolean onlyIfVisible) {
 		// TODO Auto-generated method stub
 		
 	}
