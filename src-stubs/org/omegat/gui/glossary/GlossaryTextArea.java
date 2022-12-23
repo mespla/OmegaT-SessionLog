@@ -21,11 +21,16 @@
  *************************************************************************/
 package org.omegat.gui.glossary;
 
+import java.awt.Frame;
 import java.util.List;
+import javax.swing.JPopupMenu;
 import org.omegat.core.data.SourceTextEntry;
 import org.omegat.gui.common.EntryInfoThreadPane;
+import org.omegat.util.gui.IPaneMenu;
 
-public class GlossaryTextArea extends EntryInfoThreadPane<List<GlossaryEntry>>{
+@SuppressWarnings("serial")
+public class GlossaryTextArea extends EntryInfoThreadPane<List<GlossaryEntry>>
+        implements IGlossaries, IPaneMenu {
 
     @Override
     public void onProjectChanged(PROJECT_CHANGE_TYPE eventType) {}
@@ -35,4 +40,17 @@ public class GlossaryTextArea extends EntryInfoThreadPane<List<GlossaryEntry>>{
 
     @Override
     public void onEntryActivated(SourceTextEntry newEntry) {}
+    
+    @Override
+    public List<GlossaryEntry> getDisplayedEntries() {
+        return null;
+    }
+
+    @Override
+    public void showCreateGlossaryEntryDialog(Frame parent) {
+    }
+
+    @Override
+    public void populatePaneMenu(JPopupMenu menu) {
+    }
 }
